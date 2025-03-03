@@ -1,23 +1,41 @@
-const http = require("http");
-const express = require("express");
-const dotenv = require("dotenv");
-const bookRoutes = require("./src/api/bookRoutes");
+const express = require('express');
+const pool = require('./src/config/db'); 
+const createDefaultTables = require('./src/migrations/createDefaultTables'); 
 
-dotenv.config();
 const app = express();
+//app.use(express.json());
+app.use(express.static('public'));
 
-app.use(express.json());
-app.use("/api/books", bookRoutes); 
+const booksRoutes = require('./src/api/bookRoutes');
+app.use('/api', booksRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.get('/', (req, res) => {
+  //res.send('Hello from Node.js server!');
+  res.sendFile(__dirname + '/public/index.html');
 });
 
-const hostname = process.env.HOST || "192.168.4.115";
-const port = process.env.PORT || 8080;
-
-const server = http.createServer(app);
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://tie-tkannat.it.tuni.fi:${port}/`);
+app.get('/db-test', (req, res) => {
+  pool.query('SELECT * FROM Teos', (err, result) => { 
+    if (err) {
+      console.error('Error connecting to the database:', err);
+      res.status(500).send('Database connection failed');
+    } else {
+      console.log('Connected to the database. Rows:', result.rows); 
+      res.json(result.rows); 
+    }
+  });
 });
+
+
+// migrations
+createDefaultTables()
+  .then(() => {
+    const PORT = process.env.PORT || 8080;
+    app.listen(PORT, () => {
+      console.log(`Server running on http://tie-tkannat.it.tuni.fi:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to set up database:', err);
+    process.exit(1); 
+  });

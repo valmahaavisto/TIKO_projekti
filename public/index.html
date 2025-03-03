@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divaritietokanta</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teokset</h1>
+    <table id="teosTable">
+        <thead>
+            <tr>
+                <th>ISBN</th>
+                <th>Nimi</th>
+                <th>Tekijä</th>
+                <th>Julkaisuvuosi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here dynamically -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/db-test') 
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector("#teosTable tbody");
+                    tableBody.innerHTML = ""; 
+                    
+                    data.forEach(teos => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${teos.isbn}</td>
+                            <td>${teos.nimi}</td>
+                            <td>${teos.tekija}</td>
+                            <td>${teos.julkaisuvuosi}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        });
+    </script>
+</body>
+</html>
