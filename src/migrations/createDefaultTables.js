@@ -25,15 +25,30 @@ const createDefaultTables = async () => {
         FOREIGN KEY (asiakastunnus) REFERENCES Asiakas
       );
 
+      CREATE TABLE IF NOT EXISTS Tyyppi (
+        tyyppitunnus INT NOT NULL,
+        tyyppinimi VARCHAR(20) NOT NULL,
+        PRIMARY KEY (tyyppitunnus)
+      );
+
+      CREATE TABLE IF NOT EXISTS Luokka (
+        luokkatunnus INT NOT NULL,
+        luokkanimi VARCHAR(20) NOT NULL,
+        PRIMARY KEY (luokkatunnus)
+      );
+
       CREATE TABLE IF NOT EXISTS Teos (
-        isbn CHAR(13) NOT NULL,
+        teostunnus INT NOT NULL,
+        isbn VARCHAR(13) NOT NULL,
         nimi VARCHAR(50) NOT NULL,
         tekija VARCHAR(50) NOT NULL,
         julkaisuvuosi INT NOT NULL,
-        tyyppi VARCHAR(20) NOT NULL,
-        luokka VARCHAR(20) NOT NULL,
         paino DECIMAL (5,2) NOT NULL,
-        PRIMARY KEY (isbn)
+        tyyppitunnus INT NOT NULL,
+        luokkatunnus INT NOT NULL,
+        PRIMARY KEY (teostunnus),
+        FOREIGN KEY (tyyppitunnus) REFERENCES Tyyppi,
+        FOREIGN KEY (luokkatunnus) REFERENCES Luokka
       );
 
       CREATE TABLE IF NOT EXISTS Divari (
@@ -46,24 +61,26 @@ const createDefaultTables = async () => {
       );
 
       CREATE TABLE IF NOT EXISTS Teoskappale (
-        isbn CHAR(13) NOT NULL,
         kappaletunnus INT NOT NULL,
+        teostunnus INT NOT NULL,
         divaritunnus INT NOT NULL,
         tila INT DEFAULT 0,
         sisaanostohinta DECIMAL (5,2) NOT NULL,
         myyntihinta DECIMAL (5,2) NOT NULL,
+        aikaleima TIMESTAMP DEFAULT NULL,
         myyntiaika TIMESTAMP NOT NULL,
         CHECK (tila IN (0,1,2)),
         PRIMARY KEY (kappaletunnus),
-        FOREIGN KEY (isbn) REFERENCES Teos,
+        FOREIGN KEY (teostunnus) REFERENCES Teos,
         FOREIGN KEY (divaritunnus) REFERENCES Divari
       );
 
-      CREATE TABLE IF NOT EXISTS Osalahetys (
+      CREATE TABLE IF NOT EXISTS Lahetys (
+        lahetystunnus INT NOT NULL,
         tilaustunnus INT NOT NULL,
         osalahetysnro INT NOT NULL,
         kulut DECIMAL(5,2) NOT NULL,
-        PRIMARY KEY (tilaustunnus, osalahetysnro),
+        PRIMARY KEY (lahetystunnus),
         FOREIGN KEY (tilaustunnus) REFERENCES Tilaus
       );
 
@@ -71,17 +88,6 @@ const createDefaultTables = async () => {
         painoraja DECIMAL (5,2),
         hinta DECIMAL (5,2) NOT NULL,
         PRIMARY KEY (painoraja)
-      );
-
-      CREATE TABLE IF NOT EXISTS Varattu_kappale (
-        tilaustunnus INT NOT NULL,
-        kappaletunnus INT NOT NULL,
-        aikaleima TIMESTAMP NOT NULL,
-        osalahetysnro INT DEFAULT 0,
-        PRIMARY KEY (tilaustunnus, kappaletunnus),
-        FOREIGN KEY (tilaustunnus) REFERENCES Tilaus,
-        FOREIGN KEY (kappaletunnus) REFERENCES Teoskappale,
-        FOREIGN KEY (tilaustunnus, osalahetysnro) REFERENCES Osalahetys
       );
     `);
 
