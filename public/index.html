@@ -32,42 +32,9 @@
     </style>
 </head>
 <body>
-    <h1>Teokset</h1>
-    <table id="teosTable">
-        <thead>
-            <tr>
-                <th>ISBN</th>
-                <th>Nimi</th>
-                <th>Tekijä</th>
-                <th>Julkaisuvuosi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Data will be inserted here dynamically -->
-        </tbody>
-    </table>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            fetch('/db-test') 
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.querySelector("#teosTable tbody");
-                    tableBody.innerHTML = ""; 
-                    
-                    data.forEach(teos => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                            <td>${teos.isbn}</td>
-                            <td>${teos.nimi}</td>
-                            <td>${teos.tekija}</td>
-                            <td>${teos.julkaisuvuosi}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
-                })
-                .catch(error => console.error("Error fetching data:", error));
-        });
-    </script>
+    <h1>Valitse käyttäjärooli</h1>
+    <button onclick="window.location.href='register.html'">Asiakas</button>
+    <button onClick="window.location.href='divari.html'">Divari</button>
+    <button onClick="window.location.href='keskusdivari.html'">Keskusdivari</button>
 </body>
 </html>
