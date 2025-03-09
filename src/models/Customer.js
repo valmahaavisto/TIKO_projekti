@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 
+
 const getCustomerByEmail = async (sposti) => {
     console.log(`Fetching the customer with email ${sposti}.`);
     try {
@@ -16,4 +17,37 @@ const getCustomerByEmail = async (sposti) => {
     }
 };
 
-module.exports = {getCustomerByEmail};
+
+const getCustomerByEmailPassword = async (sposti, salasana) => {
+    try {
+        const result = await pool.query('SELECT * FROM Asiakas WHERE sposti = $1 AND salasana = $2', [sposti, salasana]);
+        if (result.rows.length === 0) {
+            return null;
+        }
+        return result.rows[0];
+    } catch (error) {
+        console.log('Error in customer login: ', error)
+        throw error;
+    }
+};
+
+
+// Order by last year order count
+// const getCustomersByLastYearOrders
+
+
+
+const getAllCustomers = async () => {
+    try {
+        const result = await pool.query('SELECT * FROM Asiakas ORDER BY nimi');
+        if (result.rows.length === 0) {
+            return null;
+        }
+        return result.rows;
+    } catch (error) {
+        console.log('Error fetching all customers: ', error)
+        throw error;
+    }
+};
+
+module.exports = {getCustomerByEmail, getCustomerByEmailPassword, getAllCustomers};

@@ -3,7 +3,7 @@ const pool = require('./src/config/db');
 const createDefaultTables = require('./src/migrations/createDefaultTables'); 
 
 const app = express();
-//app.use(express.json());
+app.use(express.json());
 app.use(express.static('public'));
 
 const booksRoutes = require('./src/api/bookRoutes');
