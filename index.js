@@ -6,8 +6,8 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-const booksRoutes = require('./src/api/bookRoutes');
-app.use('/api', booksRoutes);
+const bookRoutes = require('./src/api/bookRoutes');
+app.use('/api', bookRoutes);
 
 const customerRoutes = require('./src/api/customerRoutes');
 app.use('/api', customerRoutes);
@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
-app.get('/db-test', (req, res) => {
+app.get('/api/books', (req, res) => {
   pool.query('SELECT * FROM Teos', (err, result) => { 
     if (err) {
       console.error('Error connecting to the database:', err);
