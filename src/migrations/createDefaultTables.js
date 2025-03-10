@@ -131,6 +131,17 @@ const createDefaultTables = async () => {
       ON CONFLICT (isbn) DO NOTHING;
     `);
 
+    await client.query(`
+    INSERT INTO Asiakas (asiakastunnus, nimi, osoite, pnro, sposti, salasana) VALUES
+    (1, 'Matti Meikäläinen', 'Esimerkkikatu 1, 00100 Helsinki', '12345', 'matti.meikalainen@example.com', 'salasana123'),
+    (2, 'Anna Esimerkki', 'Testikatu 5, 00200 Helsinki', '23456', 'anna.esimerkki@example.com', 'annaSalasana456'),
+    (3, 'Pekka Malli', 'Mallitie 7, 00300 Helsinki', '34567', 'pekka.malli@example.com', 'pekkaMalli789'),
+    (4, 'Laura Näyte', 'Näytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
+    (5, 'Janne Testi', 'Testikatu 12, 00500 Helsinki', '56789', 'janne.testi@example.com', 'janneTesti345')
+    ON CONFLICT (asiakastunnus) DO NOTHING;
+    `);
+
+    
     console.log('Tables created and default data inserted successfully');
   } catch (err) {
     console.error('Error creating tables or inserting data:', err);
