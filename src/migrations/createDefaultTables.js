@@ -4,101 +4,130 @@ const createDefaultTables = async () => {
   const client = await pool.connect();
   try {
     await client.query(`
-      CREATE TABLE IF NOT EXISTS Asiakas (
-        asiakastunnus INT NOT NULL,
-        nimi VARCHAR(30) NOT NULL,
-        osoite VARCHAR(50) NOT NULL,
-        pnro CHAR(5) NOT NULL,
-        sposti VARCHAR(30) NOT NULL,
-        salasana VARCHAR(50) NOT NULL,
-        PRIMARY KEY (asiakastunnus)
+      CREATE TABLE IF NOT EXISTS Customer (
+        customer_id SERIAL,
+        name VARCHAR(30) NOT NULL,
+        address VARCHAR(50) NOT NULL,
+        postal_code CHAR(5) NOT NULL,
+        email VARCHAR(30) NOT NULL,
+        password VARCHAR(50) NOT NULL,
+        PRIMARY KEY (customer_id)
       );
 
-      CREATE TABLE IF NOT EXISTS Tilaus (
-        tilaustunnus INT NOT NULL,
-        asiakastunnus INT NOT NULL,
-        vahvistusaika TIMESTAMP DEFAULT NULL,
-        tila INT DEFAULT 0,
-        kulut DECIMAL (5,2) NOT NULL,
-        CHECK (tila IN (0,1)),
-        PRIMARY KEY (tilaustunnus),
-        FOREIGN KEY (asiakastunnus) REFERENCES Asiakas
+      CREATE TABLE IF NOT EXISTS Order (
+        order_id SERIAL,
+        customer_id INT NOT NULL,
+        confirmation_time TIMESTAMP DEFAULT NULL,
+        status INT DEFAULT 0,
+        costs DECIMAL (5,2) NOT NULL,
+        CHECK (status IN (0,1)),
+        PRIMARY KEY (order_id),
+        FOREIGN KEY (customer_id) REFERENCES Customer
       );
 
-      CREATE TABLE IF NOT EXISTS Tyyppi (
-        tyyppitunnus INT NOT NULL,
-        tyyppinimi VARCHAR(20) NOT NULL,
-        PRIMARY KEY (tyyppitunnus)
+      CREATE TABLE IF NOT EXISTS Type (
+        type_id SERIAL,
+        type_name VARCHAR(20) NOT NULL,
+        PRIMARY KEY (type_id)
       );
 
-      CREATE TABLE IF NOT EXISTS Luokka (
-        luokkatunnus INT NOT NULL,
-        luokkanimi VARCHAR(20) NOT NULL,
-        PRIMARY KEY (luokkatunnus)
+      CREATE TABLE IF NOT EXISTS Category (
+        category_id SERIAL,
+        category_name VARCHAR(20) NOT NULL,
+        PRIMARY KEY (category_id)
       );
 
-      CREATE TABLE IF NOT EXISTS Teos (
-        teostunnus INT NOT NULL,
+      CREATE TABLE IF NOT EXISTS Book (
+        book_id SERIAL,
         isbn VARCHAR(13) NOT NULL,
-        nimi VARCHAR(50) NOT NULL,
-        tekija VARCHAR(50) NOT NULL,
-        julkaisuvuosi INT NOT NULL,
-        paino DECIMAL (5,2) NOT NULL,
-        tyyppitunnus INT NOT NULL,
-        luokkatunnus INT NOT NULL,
-        PRIMARY KEY (teostunnus),
-        FOREIGN KEY (tyyppitunnus) REFERENCES Tyyppi,
-        FOREIGN KEY (luokkatunnus) REFERENCES Luokka
+        title VARCHAR(50) NOT NULL,
+        author VARCHAR(50) NOT NULL,
+        publication_year INT NOT NULL,
+        weight DECIMAL (5,2) NOT NULL,
+        type_id INT NOT NULL,
+        category_id INT NOT NULL,
+        PRIMARY KEY (book_id),
+        FOREIGN KEY (type_id) REFERENCES Type,
+        FOREIGN KEY (category_id) REFERENCES Category
       );
 
-      CREATE TABLE IF NOT EXISTS Divari (
-        divaritunnus INT NOT NULL,
-        nimi VARCHAR(30) NOT NULL,
-        osoite VARCHAR(50) NOT NULL,
-        web_sivu VARCHAR(100) NOT NULL,
-        rooli INT NOT NULL,
-        PRIMARY KEY (divaritunnus)
+      CREATE TABLE IF NOT EXISTS Store (
+        store_id SERIAL,
+        name VARCHAR(30) NOT NULL,
+        address VARCHAR(50) NOT NULL,
+        website VARCHAR(100) NOT NULL,
+        role INT NOT NULL,
+        PRIMARY KEY (store_id)
       );
 
-      CREATE TABLE IF NOT EXISTS Teoskappale (
-        kappaletunnus INT NOT NULL,
-        teostunnus INT NOT NULL,
-        divaritunnus INT NOT NULL,
-        tila INT DEFAULT 0,
-        sisaanostohinta DECIMAL (5,2) NOT NULL,
-        myyntihinta DECIMAL (5,2) NOT NULL,
-        aikaleima TIMESTAMP DEFAULT NULL,
-        myyntiaika TIMESTAMP NOT NULL,
-        CHECK (tila IN (0,1,2)),
-        PRIMARY KEY (kappaletunnus),
-        FOREIGN KEY (teostunnus) REFERENCES Teos,
-        FOREIGN KEY (divaritunnus) REFERENCES Divari
+      CREATE TABLE IF NOT EXISTS BookCopy (
+        copy_id SERIAL,
+        book_id INT NOT NULL,
+        store_id INT NOT NULL,
+        status INT DEFAULT 0,
+        purchase_price DECIMAL (5,2) NOT NULL,
+        selling_price DECIMAL (5,2) NOT NULL,
+        timestamp TIMESTAMP DEFAULT NULL,
+        sale_time TIMESTAMP NOT NULL,
+        CHECK (status IN (0,1,2)),
+        PRIMARY KEY (copy_id),
+        FOREIGN KEY (book_id) REFERENCES Book,
+        FOREIGN KEY (store_id) REFERENCES Store
       );
 
-      CREATE TABLE IF NOT EXISTS Lahetys (
-        lahetystunnus INT NOT NULL,
-        tilaustunnus INT NOT NULL,
-        osalahetysnro INT NOT NULL,
-        kulut DECIMAL(5,2) NOT NULL,
-        PRIMARY KEY (lahetystunnus),
-        FOREIGN KEY (tilaustunnus) REFERENCES Tilaus
+      CREATE TABLE IF NOT EXISTS Shipment (
+        shipment_id SERIAL,
+        order_id INT NOT NULL,
+        shipment_no INT NOT NULL,
+        costs DECIMAL(5,2) NOT NULL,
+        PRIMARY KEY (shipment_id),
+        FOREIGN KEY (order_id) REFERENCES Order
       );
 
-      CREATE TABLE IF NOT EXISTS Postitushinnasto (
-        painoraja DECIMAL (5,2),
-        hinta DECIMAL (5,2) NOT NULL,
-        PRIMARY KEY (painoraja)
+      CREATE TABLE IF NOT EXISTS ShippingRates (
+        weight_limit DECIMAL (5,2),
+        price DECIMAL (5,2) NOT NULL,
+        PRIMARY KEY (weight_limit)
       );
     `);
 
     await client.query(`
-      INSERT INTO Teos (isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino) VALUES
-      ('9155430674', 'Elektran tytär', 'Madeleine Brent', 1986, 'romantiikka', 'romaani', 0.5),
-      ('9156381451', 'Tuulentavoittelijan morsian', 'Madeleine Brent', 1978, 'romantiikka', 'romaani', 0.5),
-      ('1995', 'Turms kuolematon', 'Mika Waltari', 1995, 'Historia', 'romaani', 0.5),
-      ('1940', 'Komisario Palmun erehdys', 'Mika Waltari', 1940, 'dekkari', 'romaani', 0.5),
-      ('1989', 'Friikkilän pojat Mexicossa', 'Shelton Gilbert', 1989, 'huumori', 'sarjakuva', 0.5),
-      ('9789510396230', 'Miten saan ystäviä, menestystä, vaikutusvaltaa', 'Dale Carnegie', 1939, 'opas', 'tietokirja', 0.5)
+      INSERT INTO Type (type_name) VALUES 
+      ('romance'), ('history'), ('detective'), ('humor'), ('guide')
+      ON CONFLICT (type_name) DO NOTHING;
+
+      INSERT INTO Category (category_name) VALUES 
+      ('novel'), ('comic'), ('non-fiction')
+      ON CONFLICT (category_name) DO NOTHING;
+    `);
+
+    await client.query(`
+      INSERT INTO Book (isbn, title, author, publication_year, weight, type_id, category_id)
+      VALUES
+      ('9155430674', 'Elektran tytär', 'Madeleine Brent', 1986, 0.5, 
+        (SELECT type_id FROM Type WHERE type_name = 'romance'),
+        (SELECT category_id FROM Category WHERE category_name = 'novel')
+      ),
+      ('9156381451', 'Tuulentavoittelijan morsian', 'Madeleine Brent', 1978, 0.5, 
+        (SELECT type_id FROM Type WHERE type_name = 'romance'),
+        (SELECT category_id FROM Category WHERE category_name = 'novel')
+      ),
+      ('1995', 'Turms kuolematon', 'Mika Waltari', 1995, 0.5, 
+        (SELECT type_id FROM Type WHERE type_name = 'history'),
+        (SELECT category_id FROM Category WHERE category_name = 'novel')
+      ),
+      ('1940', 'Komisario Palmun erehdys', 'Mika Waltari', 1940, 0.5, 
+        (SELECT type_id FROM Type WHERE type_name = 'detective'),
+        (SELECT category_id FROM Category WHERE category_name = 'novel')
+      ),
+      ('1989', 'Friikkilän pojat Mexicossa', 'Shelton Gilbert', 1989, 0.5, 
+        (SELECT type_id FROM Type WHERE type_name = 'humor'),
+        (SELECT category_id FROM Category WHERE category_name = 'comic')
+      ),
+      ('9789510396230', 'Miten saan ystäviä, menestystä, vaikutusvaltaa', 'Dale Carnegie', 1939, 0.5, 
+        (SELECT type_id FROM Type WHERE type_name = 'guide'),
+        (SELECT category_id FROM Category WHERE category_name = 'non-fiction')
+      )
       ON CONFLICT (isbn) DO NOTHING;
     `);
 
