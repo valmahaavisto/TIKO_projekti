@@ -19,6 +19,7 @@ const createDefaultTables = async () => {
         customer_id INT NOT NULL,
         confirmation_time TIMESTAMP DEFAULT NULL,
         status INT DEFAULT 0,
+        total_weight DEFAULT 0,
         costs DECIMAL (5,2) NOT NULL,
         CHECK (status IN (0,1)),
         PRIMARY KEY (order_id),
@@ -64,6 +65,7 @@ const createDefaultTables = async () => {
         copy_id SERIAL,
         book_id INT NOT NULL,
         store_id INT NOT NULL,
+        order_id DEFAULT 0,
         status INT DEFAULT 0,
         purchase_price DECIMAL (5,2) NOT NULL,
         selling_price DECIMAL (5,2) NOT NULL,
@@ -72,7 +74,8 @@ const createDefaultTables = async () => {
         CHECK (status IN (0,1,2)),
         PRIMARY KEY (copy_id),
         FOREIGN KEY (book_id) REFERENCES Book,
-        FOREIGN KEY (store_id) REFERENCES Store
+        FOREIGN KEY (store_id) REFERENCES Store,
+        FOREIGN KEY (order_id) REFERENCES Order
       );
 
       CREATE TABLE IF NOT EXISTS Shipment (
@@ -139,6 +142,13 @@ const createDefaultTables = async () => {
     (4, 'Laura Näyte', 'Näytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
     (5, 'Janne Testi', 'Testikatu 12, 00500 Helsinki', '56789', 'janne.testi@example.com', 'janneTesti345')
     ON CONFLICT (asiakastunnus) DO NOTHING;
+    `);
+
+
+    await client.query(`
+      INSERT INTO ShippingRates (weight_limit, price) VALUES
+      (50, 2.50), (250, 5.00), (1000, 10.00), (2000, 15.00)
+      ON CONFLICT (weight_limit) DO NOTHING;
     `);
 
     
