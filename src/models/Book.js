@@ -10,41 +10,6 @@ const getAllBooks = async () => {
   }
 };
 
-const getFilteredBooks = async ({ nimi = null, tekija = null, tyyppi = null, luokka = null }) => {
-    try {
-        let query = "SELECT * FROM Teos WHERE 1=1";
-        let values = [];
-        let counter = 1;
-    
-        if (nimi) {
-          query += ` AND nimi ILIKE $${counter}`;
-          values.push(`%${nimi}%`);
-          counter++;
-        }
-        if (tekija) {
-          query += ` AND tekija ILIKE $${counter}`;
-          values.push(`%${tekija}%`);
-          counter++;
-        }
-        if (tyyppi) {
-          query += ` AND tyyppi = $${counter}`;
-          values.push(tyyppi);
-          counter++;
-        }
-        if (luokka) {
-          query += ` AND luokka = $${counter}`;
-          values.push(luokka);
-          counter++;
-        }
-    
-        const result = await pool.query(query, values);
-        return result.rows.length > 0 ? result.rows : null;
-      } catch (error) {
-        console.error("Error fetching filtered books:", error);
-        throw error;
-      }
-    };
-
 const getBookWeightById = async (id) => {
   try {
     const result = await pool.query("SELECT paino FROM books WHERE id = $1", [id]);
@@ -82,6 +47,50 @@ const addBook = async ({ isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, pain
   }
 };
 
+const getBookWithISBN = async (isbn) => {
+  try {
+    const result = await pool.query("SELECT * FROM Teos WHERE isbn = $1", [isbn]);
+    return result.rows.length > 0 ? result.rows[0] : null;
+  } catch (error) {
+    console.error("Error fetching book by ISBN:", error);
+    throw error;
+  }
+};
 
 
-module.exports = { getAllBooks, getBookWeightById, getR2, addBook, getFilteredBooks };
+const getFilteredBooks = async ({ nimi = null, tekija = null, tyyppi = null, luokka = null }) => {
+try {
+    let query = "SELECT * FROM Teos WHERE 1=1";
+    let values = [];
+    let counter = 1;
+
+    if (nimi) {
+      query += ` AND nimi ILIKE $${counter}`;
+      values.push(`%${nimi}%`);
+      counter++;
+    }
+    if (tekija) {
+      query += ` AND tekija ILIKE $${counter}`;
+      values.push(`%${tekija}%`);
+      counter++;
+    }
+    if (tyyppi) {
+      query += ` AND tyyppi = $${counter}`;
+      values.push(tyyppi);
+      counter++;
+    }
+    if (luokka) {
+      query += ` AND luokka = $${counter}`;
+      values.push(luokka);
+      counter++;
+    }
+
+    const result = await pool.query(query, values);
+    return result.rows.length > 0 ? result.rows : null;
+  } catch (error) {
+    console.error("Error fetching filtered books:", error);
+    throw error;
+  }
+};
+
+module.exports = { getAllBooks, getBookWeightById, getR2, addBook, getBookWithISBN, getFilteredBooks };

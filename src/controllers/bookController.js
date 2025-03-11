@@ -14,22 +14,6 @@ const getBooks = async (req, res) => {
   }
 };
 
-const getFilteredBooks = async (req, res) => {
-  //console.log('Query parameters:', req.query);
-  try {
-    console.log('Query parameters:', req.query);
-    const filteredBooks = await Book.getFilteredBooks(req.query);
-    if (!filteredBooks) {
-      return res.status(404).json({ error: "No books found matching criteria." });
-    }
-    res.json(filteredBooks);
-  } catch (error) {
-    console.error("Error fetching filtered books:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-
 const getBookWeightById = async (req, res) => {
   console.log(`Received GET request: /api/books/${req.params.id}`);
   try {
@@ -70,6 +54,39 @@ const addBook = async (req, res) => {
   }
 };
 
+const getBookWithISBN = async (req, res) => {
+  const { isbn } = req.query; 
+  if (!isbn) {
+    return res.status(400).json({ error: "ISBN is required" });
+  }
+
+  try {
+    const book = await Book.getBookWithISBN(isbn);
+    if (book) {
+      res.status(200).json(book); 
+    } else {
+      res.status(404).json({ error: "Book not found" }); 
+    }
+  } catch (error) {
+    console.error("Error searching book with ISBN:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 
-module.exports = { getBooks, getBookWeightById, getR2, addBook, getFilteredBooks };
+const getFilteredBooks = async (req, res) => {
+  //console.log('Query parameters:', req.query);
+  try {
+    console.log('Query parameters:', req.query);
+    const filteredBooks = await Book.getFilteredBooks(req.query);
+    if (!filteredBooks) {
+      return res.status(404).json({ error: "No books found matching criteria." });
+    }
+    res.json(filteredBooks);
+  } catch (error) {
+    console.error("Error fetching filtered books:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports = { getBooks, getBookWeightById, getR2, addBook, getBookWithISBN, getFilteredBooks };

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer; 
+        }
+    </style>
+</head>
+<body>
+    <p>Rooli: Divari</p>
+    <button onclick="window.location.href='index.html'">Vaihda Rooli</button>
+    <form id="addForm">
+	<p>Lisää teos myyntiin, anna ISBN-tunnus</p>
+        <label for="isbn">ISBN: </label>
+        <input type="text" id="isbn" name="isbn">
+        <button type="submit">Lisää teos</button>
+    </form>
+
+    <h3>Tuota raportti R2: Teosten kokonaismyyntihinta ja keskihinta luokan mukaan</h3>
+    <button onClick="toggleR2Table()">Tuota R2</button>
+
+    <table id="R2Table" style="display:none;">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">ISBN</th>
+                <th onclick="sortTable(1)">Nimi</th>
+                <th onclick="sortTable(2)">Tekijä</th>
+                <th onclick="sortTable(3)">Julkaisuvuosi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here dynamically -->
+        </tbody>
+    </table>
+
+    <script>
+	function toggleR2Table() {
+    		var table = document.getElementById("R2Table");
+    		if (table.style.display === "none") {
+        		table.style.display = "table"; // Show table
+    		} else {
+        		table.style.display = "none"; // Hide table
+    		}
+	}
+
+	document.getElementById("addForm").addEventListener("submit", function (event) {
+    		event.preventDefault();
+    		const isbn = document.getElementById("isbn").value;
+
+    		fetch(`/api/books/getBookWithISBN?isbn=${isbn}`)
+        		.then(response => {
+           		if (response.status === 404) {
+                		window.location.href = "addBook.html"; 
+            		} else if (response.ok) {
+                		return response.json().then(() => {
+                    		window.location.href = "addBookCopy.html"; 
+                	});
+            		} else {
+               			throw new Error("Unexpected response from server");
+            		}
+       		})
+        	.catch(error => console.error("Error while looking for ISBN:", error));
+	});
+
+    </script>
+</body>
+</html>
