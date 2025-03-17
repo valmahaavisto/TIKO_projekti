@@ -45,6 +45,7 @@ const getR2 = async (req, res) => {
 
 const addBook = async (req, res) => {
   const { isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino } = req.body;
+  console.log("HERE");
   try {
     const newBook = await Book.addBook({ isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino });
     res.status(201).json(newBook);

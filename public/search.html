@@ -147,13 +147,13 @@ function populateTable(data) {
     tableBody.innerHTML = "";
 
     if (Array.isArray(data)) {
-        data.forEach(teos => {
+        data.forEach(book => {
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td>${teos.isbn}</td>
-                <td>${teos.nimi}</td>
-                <td>${teos.tekija}</td>
-                <td>${teos.julkaisuvuosi}</td>
+                <td>${book.isbn}</td>
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.publication_year}</td>
             `;
             tableBody.appendChild(row);
         });

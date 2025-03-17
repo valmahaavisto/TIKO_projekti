@@ -17,9 +17,13 @@ router.get('/books/getBookWithISBN', (req, res) => {
     bookController.getBookWithISBN(req, res);
 });
 
+router.post('/books/addBook', (req, res) => {
+    console.log('Incoming request: POST /api/books/addBook');
+    bookController.addBook(req, res);
+});
+
 //not yet implemented
 router.get("/:id/weight", bookController.getBookWeightById);
 router.get("/r2", bookController.getR2);
-router.post("/", bookController.addBook);  
 
 module.exports = router;

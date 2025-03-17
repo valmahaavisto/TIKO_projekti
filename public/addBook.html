@@ -1,1 +1,121 @@
-<p>HELLO FROM ADDBOOK</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Book</title>
+    <style>
+        /* Add some basic styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <p>Rooli: rooli</p>
+    <button onclick="window.location.href='divari.html'">Paluu</button>
+    <form id="addBookForm">
+        <p>Teos puuttuu tietokannasta, täytä teostiedot</p>
+        <label for="teos_nimi">Teoksen nimi: </label>
+        <input type="text" id="teos_nimi" name="teos_nimi" required>
+
+        <label for="teos_vuosi">Julkaisuvuosi: </label>
+        <input type="number" id="teos_vuosi" name="teos_vuosi" required>
+
+        <label for="tekija_nimi">Tekijän nimi: </label>
+        <input type="text" id="tekija_nimi" name="tekija_nimi" required>
+
+        <label for="tyyppi">Tyyppi: </label>
+        <select id="tyyppi" name="tyyppi" required>
+            <option value="history">Historia</option>
+            <option value="detective">Dekkari</option>
+            <option value="humor">Huumori</option>
+	    <option value="guide">Opas</option>
+        </select>
+
+        <label for="luokka">Luokka: </label>
+        <select id="luokka" name="luokka" required>
+            <option value="comic">Komiikka</option>
+            <option value="non-fiction">Tietokirjallisuus</option>
+        </select>
+
+        <label for="paino">Paino: </label>
+        <input type="number" id="paino" name="paino" required>
+
+        <button type="submit">Jatka</button>
+    </form>
+
+    <script>
+        // Handle form submission
+        document.getElementById("addBookForm").addEventListener("submit", function (event) {
+            event.preventDefault();  // Prevent the default form submission behavior
+
+            // Collect the form values
+            const teos_nimi = document.getElementById("teos_nimi").value;
+            const teos_vuosi = document.getElementById("teos_vuosi").value;
+            const tekija_nimi = document.getElementById("tekija_nimi").value;
+            const tyyppi = document.getElementById("tyyppi").value;
+            const luokka = document.getElementById("luokka").value;
+            const paino = document.getElementById("paino").value;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const isbn = urlParams.get('isbn');
+
+            // Prepare the data to be sent to the backend
+            const bookData = {
+                isbn: isbn,  // If ISBN is not provided in the form, you can set it as an empty string or handle it accordingly
+                nimi: teos_nimi,
+                tekija: tekija_nimi,
+                julkaisuvuosi: teos_vuosi,
+                tyyppi: tyyppi,
+                luokka: luokka,
+                paino: paino
+            };
+
+            // Send the data to the backend to add the book
+            fetch('/api/books/addBook', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookData) 
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to add book');
+                }
+            })
+            .then(data => {
+                alert('Book added successfully!');
+                window.location.href = "divari.html"; // Redirect to divari.html after successful addition
+            })
+            .catch(error => {
+                console.error('Error adding book:', error);
+                alert('Failed to add book. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -76,10 +76,10 @@
     		fetch(`/api/books/getBookWithISBN?isbn=${isbn}`)
         		.then(response => {
            		if (response.status === 404) {
-                		window.location.href = "addBook.html"; 
+                		window.location.href = `addBook.html?isbn=${isbn}`; // If book is not found, go to addBook.html
             		} else if (response.ok) {
                 		return response.json().then(() => {
-                    		window.location.href = "addBookCopy.html"; 
+                    		window.location.href = "addBookCopy.html"; // If found, go to addBookCopy.html
                 	});
             		} else {
                			throw new Error("Unexpected response from server");

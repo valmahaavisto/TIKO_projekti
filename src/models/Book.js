@@ -2,7 +2,8 @@ const pool = require("../config/db");
 
 const getAllBooks = async () => {
   try {
-    const result = await pool.query("SELECT * FROM Teos");
+    const result = await pool.query("SELECT * FROM Book");
+	console.log(result);
     return result.rows.length > 0 ? result.rows : null;
   } catch (error) {
     console.error("Error fetching all books:", error);
@@ -34,12 +35,30 @@ const getR2 = async () => {
   }
 };
 
+
 const addBook = async ({ isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino }) => {
   try {
+    const typeResult = await pool.query("SELECT type_id FROM Type WHERE type_name = $1", [tyyppi]);
+
+    if (typeResult.rows.length === 0) {
+      throw new Error(`Type ${tyyppi} not found`);
+    }
+    const type_id = typeResult.rows[0].type_id;
+
+    const categoryResult = await pool.query("SELECT category_id FROM Category WHERE category_name = $1", [luokka]);
+
+    if (categoryResult.rows.length === 0) {
+      throw new Error(`Category ${luokka} not found`);
+    }
+    const category_id = categoryResult.rows[0].category_id;
+
     const result = await pool.query(
-      "INSERT INTO books (isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-      [isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino]
+      `INSERT INTO Book (isbn, title, author, publication_year, weight, type_id, category_id) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      RETURNING *`,
+      [isbn, nimi, tekija, julkaisuvuosi, paino, type_id, category_id]
     );
+
     return result.rows[0];
   } catch (error) {
     console.error("Error adding book:", error);
