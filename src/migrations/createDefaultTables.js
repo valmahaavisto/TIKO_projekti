@@ -26,7 +26,7 @@ const createDefaultTables = async () => {
 
       CREATE TABLE IF NOT EXISTS Type (
         type_id SERIAL PRIMARY KEY,
-        type_name VARCHAR(20) NOT NULL UNIQUE,
+        type_name VARCHAR(20) NOT NULL UNIQUE
       );
 
       CREATE TABLE IF NOT EXISTS Category (
@@ -146,7 +146,7 @@ const createDefaultTables = async () => {
 
     await client.query(`
       INSERT INTO ShippingRates (weight_limit, price) VALUES
-      (50, 2.50), (250, 5.00), (1000, 10.00), (2000, 15.00)
+      (50, 2.50), (250, 5.00), (10, 10.00), (20, 15.00)
       ON CONFLICT (weight_limit) DO NOTHING;
     `);
 

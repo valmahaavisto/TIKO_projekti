@@ -1,10 +1,10 @@
 const pool = require('../config/db');
 
-
-const getCustomerByEmail = async (sposti) => {
-    console.log(`Fetching the customer with email ${sposti}.`);
+// Not needed, for testing
+const getCustomerByEmail = async (email) => {
+    console.log(`Fetching the customer with email ${email}.`);
     try {
-        const result = await pool.query('SELECT * FROM Asiakas WHERE sposti = $1', [sposti]);
+        const result = await pool.query('SELECT * FROM Customer WHERE email = $1', [email]);
         if (result.rows.length === 0) {
             console.log('No customer found with this email.');
             return null;
@@ -18,15 +18,38 @@ const getCustomerByEmail = async (sposti) => {
 };
 
 
-const getCustomerByEmailPassword = async (sposti, salasana) => {
+const getCustomerLogin = async (email, password) => {
     try {
-        const result = await pool.query('SELECT * FROM Asiakas WHERE sposti = $1 AND salasana = $2', [sposti, salasana]);
+        const result = await pool.query('SELECT * FROM Customer WHERE email = $1 AND password = $2', [email, password]);
         if (result.rows.length === 0) {
             return null;
         }
         return result.rows[0];
     } catch (error) {
         console.log('Error in customer login: ', error)
+        throw error;
+    }
+};
+
+const registerNewCustomer = async (name, address, postalCode, email, password) => {
+    try {
+        const result = await pool.query(
+            'INSERT INTO Customer (name, address, postal_code, email, password) VALUES ($1, $2, $3, $4, $5)',
+            [name, address, postalCode, email, password]
+        );
+        if (result.rowCount > 0) {
+            return {
+                success: true,
+                message: "Registration successful!"
+            };
+        } else {
+            return {
+                success: false,
+                message: "Registration failed."
+            };
+        }
+    } catch (error) {
+        console.log('Error in customer registration: ', error)
         throw error;
     }
 };
@@ -39,7 +62,7 @@ const getCustomerByEmailPassword = async (sposti, salasana) => {
 
 const getAllCustomers = async () => {
     try {
-        const result = await pool.query('SELECT * FROM Asiakas ORDER BY nimi');
+        const result = await pool.query('SELECT * FROM Customer ORDER BY customer_id');
         if (result.rows.length === 0) {
             return null;
         }
@@ -50,4 +73,4 @@ const getAllCustomers = async () => {
     }
 };
 
-module.exports = {getCustomerByEmail, getCustomerByEmailPassword, getAllCustomers};
+module.exports = {getCustomerByEmail, getCustomerLogin, registerNewCustomer, getAllCustomers};
