@@ -63,30 +63,31 @@
 	function toggleR2Table() {
     		var table = document.getElementById("R2Table");
     		if (table.style.display === "none") {
-        		table.style.display = "table"; // Show table
+        		table.style.display = "table"; 
     		} else {
-        		table.style.display = "none"; // Hide table
+        		table.style.display = "none"; 
     		}
 	}
 
-	document.getElementById("addForm").addEventListener("submit", function (event) {
-    		event.preventDefault();
-    		const isbn = document.getElementById("isbn").value;
+document.getElementById("addForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const isbn = document.getElementById("isbn").value;
 
-    		fetch(`/api/books/getBookWithISBN?isbn=${isbn}`)
-        		.then(response => {
-           		if (response.status === 404) {
-                		window.location.href = `addBook.html?isbn=${isbn}`; // If book is not found, go to addBook.html
-            		} else if (response.ok) {
-                		return response.json().then(() => {
-                    		window.location.href = "addBookCopy.html"; // If found, go to addBookCopy.html
-                	});
-            		} else {
-               			throw new Error("Unexpected response from server");
-            		}
-       		})
-        	.catch(error => console.error("Error while looking for ISBN:", error));
-	});
+    fetch(`/api/books/getBookWithISBN?isbn=${isbn}`)
+        .then(response => {
+                if (response.status === 404) {
+                    window.location.href = `addBook.html?isbn=${isbn}`;
+                } else if (response.ok) {
+                    response.json().then(data => {
+                        const book_id = data.book_id;
+                        window.location.href = `addBookCopy.html?book_id=${book_id}`;
+                    });
+                } else {
+                    throw new Error("Unexpected response from server");
+                }
+        })
+        .catch(error => console.error("Error while looking for ISBN:", error));
+    });
 
     </script>
 </body>

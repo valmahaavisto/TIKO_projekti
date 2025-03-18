@@ -55,6 +55,19 @@ const addBook = async (req, res) => {
   }
 };
 
+const addBookCopy = async (req, res) => {
+  const { book_id, purchase_price, selling_price } = req.body;
+  try {
+    const newBook = await Book.addBookCopy({ book_id, purchase_price, selling_price });
+    res.status(201).json(newBook);
+  } catch (error) {
+    console.error("Error adding book:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
 const getBookWithISBN = async (req, res) => {
   const { isbn } = req.query; 
   if (!isbn) {
@@ -76,7 +89,6 @@ const getBookWithISBN = async (req, res) => {
 
 
 const getFilteredBooks = async (req, res) => {
-  //console.log('Query parameters:', req.query);
   try {
     console.log('Query parameters:', req.query);
     const filteredBooks = await Book.getFilteredBooks(req.query);
@@ -90,4 +102,4 @@ const getFilteredBooks = async (req, res) => {
   }
 };
 
-module.exports = { getBooks, getBookWeightById, getR2, addBook, getBookWithISBN, getFilteredBooks };
+module.exports = { getBooks, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };
