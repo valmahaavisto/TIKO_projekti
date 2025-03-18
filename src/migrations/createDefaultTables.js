@@ -47,13 +47,13 @@ const createDefaultTables = async () => {
         FOREIGN KEY (category_id) REFERENCES Category
       );
 
-      CREATE TABLE IF NOT EXISTS Store (
-        store_id SERIAL PRIMARY KEY,
-        name VARCHAR(30) NOT NULL,
-        address VARCHAR(50) NOT NULL,
-        website VARCHAR(100) NOT NULL,
-        role INT NOT NULL
-      );
+     CREATE TABLE IF NOT EXISTS Store (
+    	store_id SERIAL PRIMARY KEY,
+    	name VARCHAR(30) NOT NULL UNIQUE,
+    	address VARCHAR(50) NOT NULL,
+    	website VARCHAR(100) NOT NULL,
+    	role INT NOT NULL
+	);
 
       CREATE TABLE IF NOT EXISTS BookCopy (
         copy_id SERIAL PRIMARY KEY,
@@ -106,7 +106,7 @@ const createDefaultTables = async () => {
     await client.query(`
       INSERT INTO Book (isbn, title, author, publication_year, weight, type_id, category_id)
       VALUES
-      ('9155430674', 'Elektran tyt�r', 'Madeleine Brent', 1986, 0.5, 
+      ('9155430674', 'Elektran tyt r', 'Madeleine Brent', 1986, 0.5, 
         (SELECT type_id FROM Type WHERE type_name = 'romance'),
         (SELECT category_id FROM Category WHERE category_name = 'novel')
       ),
@@ -122,11 +122,11 @@ const createDefaultTables = async () => {
         (SELECT type_id FROM Type WHERE type_name = 'detective'),
         (SELECT category_id FROM Category WHERE category_name = 'novel')
       ),
-      ('1989', 'Friikkil�n pojat Mexicossa', 'Shelton Gilbert', 1989, 0.5, 
+      ('1989', 'Friikkil n pojat Mexicossa', 'Shelton Gilbert', 1989, 0.5, 
         (SELECT type_id FROM Type WHERE type_name = 'humor'),
         (SELECT category_id FROM Category WHERE category_name = 'comic')
       ),
-      ('9789510396230', 'Miten saan yst�vi�, menestyst�, vaikutusvaltaa', 'Dale Carnegie', 1939, 0.5, 
+      ('9789510396230', 'Miten saan yst vi , menestyst , vaikutusvaltaa', 'Dale Carnegie', 1939, 0.5, 
         (SELECT type_id FROM Type WHERE type_name = 'guide'),
         (SELECT category_id FROM Category WHERE category_name = 'non-fiction')
       )
@@ -135,10 +135,10 @@ const createDefaultTables = async () => {
 
     await client.query(`
     INSERT INTO Customer (name, address, postal_code, email, password) VALUES
-    ('Matti Meik�l�inen', 'Esimerkkikatu 1, 00100 Helsinki', '12345', 'matti.meikalainen@example.com', 'salasana123'),
+    ('Matti Meik l inen', 'Esimerkkikatu 1, 00100 Helsinki', '12345', 'matti.meikalainen@example.com', 'salasana123'),
     ('Anna Esimerkki', 'Testikatu 5, 00200 Helsinki', '23456', 'anna.esimerkki@example.com', 'annaSalasana456'),
     ('Pekka Malli', 'Mallitie 7, 00300 Helsinki', '34567', 'pekka.malli@example.com', 'pekkaMalli789'),
-    ('Laura N�yte', 'N�ytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
+    ('Laura N yte', 'N ytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
     ('Janne Testi', 'Testikatu 12, 00500 Helsinki', '56789', 'janne.testi@example.com', 'janneTesti345')
     ON CONFLICT (email) DO NOTHING;
     `);
@@ -150,7 +150,13 @@ const createDefaultTables = async () => {
       ON CONFLICT (weight_limit) DO NOTHING;
     `);
 
-    
+    await client.query(`
+      INSERT INTO Store (name, address, website, role) VALUES
+      ('Keskusdivari', 'Esimerkkikatu 1, Helsinki', 'https://keskusdivari.example.com', 1),
+      ('Divari', 'Esimerkkikatu 2, Helsinki', 'https://divari.example.com', 2)
+      ON CONFLICT (name) DO NOTHING;
+    `);    
+
     console.log('Tables created and default data inserted successfully');
   } catch (err) {
     console.error('Error creating tables or inserting data:', err);

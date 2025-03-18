@@ -66,11 +66,9 @@
     </form>
 
     <script>
-        // Handle form submission
         document.getElementById("addBookForm").addEventListener("submit", function (event) {
             event.preventDefault();  // Prevent the default form submission behavior
 
-            // Collect the form values
             const teos_nimi = document.getElementById("teos_nimi").value;
             const teos_vuosi = document.getElementById("teos_vuosi").value;
             const tekija_nimi = document.getElementById("tekija_nimi").value;
@@ -81,9 +79,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             const isbn = urlParams.get('isbn');
 
-            // Prepare the data to be sent to the backend
             const bookData = {
-                isbn: isbn,  // If ISBN is not provided in the form, you can set it as an empty string or handle it accordingly
+                isbn: isbn,
                 nimi: teos_nimi,
                 tekija: tekija_nimi,
                 julkaisuvuosi: teos_vuosi,
@@ -92,30 +89,31 @@
                 paino: paino
             };
 
-            // Send the data to the backend to add the book
-            fetch('/api/books/addBook', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(bookData) 
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Failed to add book');
-                }
-            })
-            .then(data => {
-                alert('Book added successfully!');
-                window.location.href = "divari.html"; // Redirect to divari.html after successful addition
-            })
-            .catch(error => {
-                console.error('Error adding book:', error);
-                alert('Failed to add book. Please try again.');
-            });
+	fetch('/api/books/addBook', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookData) 
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to add book');
+            }
+        })
+        .then(data => {
+            const bookId = data.book_id;
+	    console.log(bookId);
+            alert('Book added successfully!');            
+            window.location.href = `addBookCopy.html?book_id=${bookId}`;
+        })
+        .catch(error => {
+            console.error('Error adding book:', error);
+            alert('Failed to add book. Please try again.');
         });
+	});
     </script>
 </body>
 </html>

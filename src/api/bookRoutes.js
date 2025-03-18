@@ -22,6 +22,12 @@ router.post('/books/addBook', (req, res) => {
     bookController.addBook(req, res);
 });
 
+router.post('/books/addBookCopy', (req, res) => {
+    console.log('Incoming request: POST /api/books/addBookCopy');
+    bookController.addBookCopy(req, res);
+});
+
+
 //not yet implemented
 router.get("/:id/weight", bookController.getBookWeightById);
 router.get("/r2", bookController.getR2);

@@ -1,1 +1,89 @@
-<p>HELLO FROM COPY BOOK</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Book Copy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <p>Rooli: rooli</p>
+    <button onclick="window.location.href='addBook.html'">Paluu</button>
+    <form id="addBookCopyForm">
+        <p>Täytä teoskappaleen hintatiedot</p>
+        <label for="purchase_price">Sisäänostohinta: </label>
+        <input type="number" id="purchase_price" name="purchase_price" required>
+
+        <label for="selling_price">Myyntihinta: </label>
+        <input type="number" id="selling_price" name="selling_price" required>
+
+        <button type="submit">Vahvista lisäys</button>
+    </form>
+
+    <script>
+        document.getElementById("addBookCopyForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const purchase_price = document.getElementById("purchase_price").value;
+            const selling_price = document.getElementById("selling_price").value;
+
+	    const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('book_id');            
+	    
+
+            const bookCopyData = {
+                book_id: bookId,
+                purchase_price: purchase_price,
+		selling_price: selling_price
+            };
+
+            fetch('/api/books/addBookCopy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookCopyData) 
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to add book');
+                }
+            })
+            .then(data => {
+                alert('Book added successfully!');
+                window.location.href = "divari.html"; 
+            })
+            .catch(error => {
+                console.error('Error adding book:', error);
+                alert('Failed to add book. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>

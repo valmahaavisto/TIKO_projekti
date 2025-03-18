@@ -35,7 +35,6 @@ const getR2 = async () => {
   }
 };
 
-
 const addBook = async ({ isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino }) => {
   try {
     const typeResult = await pool.query("SELECT type_id FROM Type WHERE type_name = $1", [tyyppi]);
@@ -55,20 +54,43 @@ const addBook = async ({ isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, pain
     const result = await pool.query(
       `INSERT INTO Book (isbn, title, author, publication_year, weight, type_id, category_id) 
       VALUES ($1, $2, $3, $4, $5, $6, $7) 
-      RETURNING *`,
+      RETURNING book_id`,
       [isbn, nimi, tekija, julkaisuvuosi, paino, type_id, category_id]
     );
 
-    return result.rows[0];
+    return result.rows[0].book_id;
   } catch (error) {
     console.error("Error adding book:", error);
     throw error;
   }
 };
 
+const addBookCopy = async ({ book_id, store_id, purchase_price, selling_price }) => {
+  try {
+    const bookResult = await pool.query("SELECT book_id FROM Book WHERE book_id = $1", [book_id]);
+
+    if (bookResult.rows.length === 0) {
+      throw new Error(`Book with ID ${book_id} not found`);
+    }
+
+    const result = await pool.query(
+      `INSERT INTO BookCopy (book_id, store_id, purchase_price, selling_price, status, order_id, timestamp, sale_time) 
+       VALUES ($1, $2, $3, $4, 0, 0, NOW(), NOW()) 
+       RETURNING copy_id`,
+      [book_id, store_id, purchase_price, selling_price]
+    );
+
+    return result.rows[0].copy_id;
+  } catch (error) {
+    console.error("Error adding book copy:", error);
+    throw error;
+  }
+};
+
+
 const getBookWithISBN = async (isbn) => {
   try {
-    const result = await pool.query("SELECT * FROM Teos WHERE isbn = $1", [isbn]);
+    const result = await pool.query("SELECT * FROM Book WHERE isbn = $1", [isbn]);
     return result.rows.length > 0 ? result.rows[0] : null;
   } catch (error) {
     console.error("Error fetching book by ISBN:", error);
@@ -79,7 +101,7 @@ const getBookWithISBN = async (isbn) => {
 
 const getFilteredBooks = async ({ nimi = null, tekija = null, tyyppi = null, luokka = null }) => {
 try {
-    let query = "SELECT * FROM Teos WHERE 1=1";
+    let query = "SELECT * FROM Book WHERE 1=1";
     let values = [];
     let counter = 1;
 
@@ -112,4 +134,4 @@ try {
   }
 };
 
-module.exports = { getAllBooks, getBookWeightById, getR2, addBook, getBookWithISBN, getFilteredBooks };
+module.exports = { getAllBooks, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };
