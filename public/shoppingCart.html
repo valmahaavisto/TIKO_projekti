@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer; 
+        }
+    </style>
+</head>
+<body>
+	<p>Rooli: Asiakas </p>
+	<button onclick="window.location.href='index.html'">Vaihda Rooli</button>
+	<button onclick="window.location.href='search.html'">Takaisin hakuun</button>
+	<h2>Ostoskori</h2>
+    <table id="cart-table">
+        <thead>
+            <tr>
+                <th>Tuote</th>
+                <th>Hinta (&#8364)</th>
+                <th>Toiminnot</th>
+            </tr>
+        </thead>
+        <tbody id="cart-body">
+            <!-- Items will be dynamically added here -->
+        </tbody>
+    </table>
+
+	<div class="summary">
+        <p>VÃ¤lisumma: <span id="total-price">0.00</span> &#8364</p>
+        <p>Toimituskulut: <span id="shipping-cost">0.00</span> &#8364</p>
+        <p>Kokonaissumma: <span id="final-price">0.00</span> &#8364</p>
+    </div>
+
+	<button>Tilaa</button>
+
+	<script>
+        async function fetchCartItems(orderId) {
+            try {
+                const response = await fetch(`/api/orders/getOrderById?order_id=${orderId}`);
+                if (response.ok) {
+					const bookCopies = await response.json();
+                    let totalPrice = 0;
+					let shippingCost = 0;
+                    const cartTable = document.getElementById("cart-body");
+                    cartTable.innerHTML = ""; // Clear previous items
+
+                    for (const copy of bookCopies){
+                        const bookResponse = await fetch(`/api/books/${copy.book_id}`);
+                        if (!bookResponse.ok) {
+                    		console.error(`Failed to fetch book details for ID ${copy.book_id}`);
+                    		continue;
+               			}
+                		const book = await bookResponse.json();
+                        totalPrice += book.price;
+
+						const row = `<tr>
+                        	<td>${book.title}</td>
+                        	<td>${book.author}</td>
+                        	<td>${book.price.toFixed(2)} &#8364</td>
+                    		</tr>`;
+                		tableBody.innerHTML += row;
+                    };
+
+                    
+                    fetchShippingCost(orderId, totalPrice);
+
+					document.getElementById("total-price").innerText = totalPrice.toFixed(2) + " &#8364";
+            		document.getElementById("shipping-cost").innerText = shippingCost.toFixed(2) + " &#8364";
+            		document.getElementById("total-sum").innerText = (totalPrice + shippingCost).toFixed(2) + " €";
+                } else {
+                    console.error("Error fetching cart items:", data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        // Fetch shipping cost from backend
+        async function fetchShippingCost(orderId, totalPrice) {
+            try {
+                const response = await fetch(`/api/orders/countShippingCosts?order_id=${orderId}`);
+                const data = await response.json();
+                if (response.ok) {
+                    const shippingCost = data.shipping_cost;
+                    document.getElementById("shipping-cost").textContent = `Shipping: $${shippingCost.toFixed(2)}`;
+                    updateTotal(totalPrice, shippingCost);
+                } else {
+                    console.error("Error fetching shipping cost:", data.error);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        // Update the final total price
+        function updateTotal(totalPrice, shippingCost) {
+            const finalTotal = totalPrice + shippingCost;
+            document.getElementById("final-price").textContent = `Final Total: $${finalTotal.toFixed(2)}`;
+        }
+
+        fetchCartItems(1);
+    </script>
+
+</body>
+</html>

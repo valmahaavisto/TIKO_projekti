@@ -12,18 +12,24 @@ router.get('/orders/getOrderById', (req, res) => {
 	orderController.getOrderById(req, res);
 });
 
+router.post('/orders/createOrder', (req,res) => {
+	console.log('Incoming request. POST /api/orders/createOrder');
+	orderController.createOrder(req,res);
+});
+
+
 router.get('/orders/countShippingCosts', (req, res) => {
 	console.log('Incoming request. GET /api/orders/countShippingCosts');
 	orderController.countShippingCosts(req,res); 
 });
 
-router.get('/orders/addToOrder', (req, res) => {
-    console.log('Incoming request: GET /api/orders/addToOrder');
+router.post('/orders/addToOrder', (req, res) => {
+    console.log('Incoming request: POST /api/orders/addToOrder');
     orderController.addToOrder(req, res);
 }); 
 
-router.get('/orders/removeFromOrder', (req, res) => {
-    console.log('Incoming request: GET /api/orders/removeFromOrder');
+router.post('/orders/removeFromOrder', (req, res) => {
+    console.log('Incoming request: POST /api/orders/removeFromOrder');
     orderController.removeFromOrder(req, res);
 }); 
 
