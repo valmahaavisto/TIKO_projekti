@@ -46,16 +46,17 @@
         <label for="tyyppi">Tyyppi:</label>
         <select id="tyyppi" name="tyyppi">
             <option value="">Valitse tyyppi</option>
-            <option value="kirja">Kirja</option>
-            <option value="lehti">Lehti</option>
-            <option value="artikkeli">Artikkeli</option>
+            <option value="history">Historia</option>
+            <option value="detective">Dekkari</option>
+            <option value="humor">Huumori</option>
+	    <option value="guide">Opas</option>
         </select>
 
         <label for="luokka">Luokka:</label>
         <select id="luokka" name="luokka">
             <option value="">Valitse luokka</option>
-            <option value="kaunokirjallisuus">Kaunokirjallisuus</option>
-            <option value="tietokirjallisuus">Tietokirjallisuus</option>
+            <option value="comic">Komiikka</option>
+            <option value="non-fiction">Tietokirjallisuus</option>
             <option value="muu">Muu</option>
         </select>
 
@@ -128,12 +129,12 @@
         }
 
         function fetchFilteredBooks() {
-            const nimi = document.getElementById("teos_nimi").value;
-            const tekija = document.getElementById("tekija_nimi").value;
-            const tyyppi = document.getElementById("tyyppi").value;
-            const luokka = document.getElementById("luokka").value;
+            const title = document.getElementById("teos_nimi").value;
+            const author = document.getElementById("tekija_nimi").value;
+            const type = document.getElementById("tyyppi").value;
+            const category = document.getElementById("luokka").value;
 
-            const queryParams = new URLSearchParams({ nimi, tekija, tyyppi, luokka }).toString();
+            const queryParams = new URLSearchParams({ title, author, type, category }).toString();
 
 	    console.log(queryParams);
             fetch(`api/books/filtered?${queryParams}`)
@@ -149,12 +150,15 @@ function populateTable(data) {
     if (Array.isArray(data)) {
         data.forEach(book => {
             const row = document.createElement("tr");
+	    row.setAttribute("data-book-id", book.book_id)
+	    console.log(book.book_id);
             row.innerHTML = `
                 <td>${book.isbn}</td>
                 <td>${book.title}</td>
                 <td>${book.author}</td>
                 <td>${book.publication_year}</td>
             `;
+	    row.addEventListener("click", () => toggleBookCopies(row));
             tableBody.appendChild(row);
         });
     } else {
@@ -163,6 +167,58 @@ function populateTable(data) {
         tableBody.appendChild(row);
     }
 }
+
+function toggleBookCopies(row) {
+    const existingCopyTable = row.nextElementSibling;
+    if (existingCopyTable && existingCopyTable.classList.contains("book-copy-table")) {
+        existingCopyTable.remove();
+        return;
+    }
+
+    const bookId = row.getAttribute("data-book-id");
+
+    fetch(`api/bookcopies?book_id=${bookId}`)
+        .then(response => response.json())
+        .then(data => {
+            const copyTable = document.createElement("tr");
+            copyTable.classList.add("book-copy-table");
+
+            if (data.length == 1) {
+                copyTable.innerHTML = `<td colspan="4">No book copies found</td>`;
+            } else {
+                copyTable.innerHTML = `
+                    <td colspan="4">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Copy ID</th>
+                                    <th>Store ID</th>
+                                    <th>Status</th>
+                                    <th>Purchase Price</th>
+                                    <th>Selling Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.map(copy => `
+                                    <tr>
+                                        <td>${copy.copy_id || "N/A"}</td>
+                                        <td>${copy.store_id || "N/A"}</td>
+                                        <td>${copy.status || "0"}</td>
+                                        <td>${copy.purchase_price || "N/A"}</td>
+                                        <td>${copy.selling_price || "N/A"}</td>
+                                    </tr>
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </td>
+                `;
+            }
+
+            row.parentNode.insertBefore(copyTable, row.nextSibling);
+        })
+        .catch(error => console.error("Error fetching book copies:", error));
+}
+
 
     </script>
 </body>

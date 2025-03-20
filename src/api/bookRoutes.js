@@ -7,6 +7,12 @@ router.get('/books', (req, res) => {
     bookController.getBooks(req, res);
 }); 
 
+router.get('/bookcopies', (req, res) => {
+    console.log('Incoming request: GET /api/bookcopies');
+    console.log(req.query);
+    bookController.getBookCopies(req, res);
+});
+
 router.get('/books/filtered', (req, res) => {
     console.log('Incoming request: GET /api/books/filtered');
     bookController.getFilteredBooks(req, res);

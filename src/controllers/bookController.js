@@ -14,6 +14,23 @@ const getBooks = async (req, res) => {
   }
 };
 
+const getBookCopies = async (req, res) => {
+  try {
+    const bookId = req.query.book_id;
+    const allBooksWithCopies = await Book.getAllBookCopies(bookId);
+
+    if (!allBooksWithCopies || allBooksWithCopies.length === 0) {
+      return res.json({ message: "No book copies found" });
+    }
+
+    res.json(allBooksWithCopies);
+  } catch (err) {
+    console.error("Error fetching all book copies:", err.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
 const getBookWeightById = async (req, res) => {
   console.log(`Received GET request: /api/books/${req.params.id}`);
   try {
@@ -45,7 +62,6 @@ const getR2 = async (req, res) => {
 
 const addBook = async (req, res) => {
   const { isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino } = req.body;
-  console.log("HERE");
   try {
     const newBook = await Book.addBook({ isbn, nimi, tekija, julkaisuvuosi, tyyppi, luokka, paino });
     res.status(201).json(newBook);
@@ -56,9 +72,9 @@ const addBook = async (req, res) => {
 };
 
 const addBookCopy = async (req, res) => {
-  const { book_id, purchase_price, selling_price } = req.body;
+  const { book_id, store_id, purchase_price, selling_price } = req.body;
   try {
-    const newBook = await Book.addBookCopy({ book_id, purchase_price, selling_price });
+    const newBook = await Book.addBookCopy({ book_id, store_id, purchase_price, selling_price });
     res.status(201).json(newBook);
   } catch (error) {
     console.error("Error adding book:", error);
@@ -89,8 +105,8 @@ const getBookWithISBN = async (req, res) => {
 
 
 const getFilteredBooks = async (req, res) => {
+  //console.log('Query parameters:', req.query);
   try {
-    console.log('Query parameters:', req.query);
     const filteredBooks = await Book.getFilteredBooks(req.query);
     if (!filteredBooks) {
       return res.status(404).json({ error: "No books found matching criteria." });
@@ -102,4 +118,4 @@ const getFilteredBooks = async (req, res) => {
   }
 };
 
-module.exports = { getBooks, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };
+module.exports = { getBooks, getBookCopies, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };

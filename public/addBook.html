@@ -78,6 +78,9 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const isbn = urlParams.get('isbn');
+			const store_id = urlParams.get('store_id');
+
+	    console.log(isbn);
 
             const bookData = {
                 isbn: isbn,
@@ -104,10 +107,9 @@
             }
         })
         .then(data => {
-            const bookId = data.book_id;
-	    console.log(bookId);
+            const bookId = data;
             alert('Book added successfully!');            
-            window.location.href = `addBookCopy.html?book_id=${bookId}`;
+            window.location.href = `addBookCopy.html?book_id=${bookId}&store_id=${store_id}`;
         })
         .catch(error => {
             console.error('Error adding book:', error);

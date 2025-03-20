@@ -3,7 +3,7 @@ const pool = require("../config/db");
 const getAllBooks = async () => {
   try {
     const result = await pool.query("SELECT * FROM Book");
-	console.log(result);
+    console.log(result.rows);
     return result.rows.length > 0 ? result.rows : null;
   } catch (error) {
     console.error("Error fetching all books:", error);
@@ -11,9 +11,26 @@ const getAllBooks = async () => {
   }
 };
 
+const getAllBookCopies = async (bookId = null) => {
+    try {
+        const query = `
+            SELECT b.book_id, b.title, bc.copy_id, bc.store_id, bc.status, bc.purchase_price, bc.selling_price
+            FROM Book b
+            LEFT JOIN BookCopy bc ON b.book_id = bc.book_id
+            WHERE $1::INTEGER IS NULL OR b.book_id = $1::INTEGER
+        `;
+        const result = await pool.query(query, [bookId]);
+        return result.rows;
+    } catch (error) {
+        console.error("Error fetching books with copies:", error);
+        throw error;
+    }
+};
+
+
 const getBookWeightById = async (id) => {
   try {
-    const result = await pool.query("SELECT paino FROM books WHERE id = $1", [id]);
+    const result = await pool.query("SELECT weight FROM Book WHERE id = $1", [id]);
     return result.rows.length > 0 ? result.rows[0] : null;
   } catch (error) {
     console.error("Error fetching book weight by ID:", error);
@@ -75,7 +92,7 @@ const addBookCopy = async ({ book_id, store_id, purchase_price, selling_price })
 
     const result = await pool.query(
       `INSERT INTO BookCopy (book_id, store_id, purchase_price, selling_price, status, order_id, timestamp, sale_time) 
-       VALUES ($1, $2, $3, $4, 0, 0, NOW(), NOW()) 
+       VALUES ($1, $2, $3, $4, 0, NULL, NOW(), NOW()) 
        RETURNING copy_id`,
       [book_id, store_id, purchase_price, selling_price]
     );
@@ -99,30 +116,30 @@ const getBookWithISBN = async (isbn) => {
 };
 
 
-const getFilteredBooks = async ({ nimi = null, tekija = null, tyyppi = null, luokka = null }) => {
+const getFilteredBooks = async ({ title = null, author = null, type = null, category = null }) => {
 try {
     let query = "SELECT * FROM Book WHERE 1=1";
     let values = [];
     let counter = 1;
 
-    if (nimi) {
-      query += ` AND nimi ILIKE $${counter}`;
-      values.push(`%${nimi}%`);
+    if (title) {
+      query += ` AND title ILIKE $${counter}`;
+      values.push(`%${title}%`);
       counter++;
     }
-    if (tekija) {
-      query += ` AND tekija ILIKE $${counter}`;
-      values.push(`%${tekija}%`);
+    if (author) {
+      query += ` AND author ILIKE $${counter}`;
+      values.push(`%${author}%`);
       counter++;
     }
-    if (tyyppi) {
-      query += ` AND tyyppi = $${counter}`;
-      values.push(tyyppi);
+    if (type) {
+      query += ` AND type = $${counter}`;
+      values.push(type);
       counter++;
     }
-    if (luokka) {
-      query += ` AND luokka = $${counter}`;
-      values.push(luokka);
+    if (category) {
+      query += ` AND category = $${counter}`;
+      values.push(category);
       counter++;
     }
 
@@ -134,4 +151,4 @@ try {
   }
 };
 
-module.exports = { getAllBooks, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };
+module.exports = { getAllBooks, getAllBookCopies, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };

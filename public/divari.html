@@ -76,11 +76,11 @@ document.getElementById("addForm").addEventListener("submit", function (event) {
     fetch(`/api/books/getBookWithISBN?isbn=${isbn}`)
         .then(response => {
                 if (response.status === 404) {
-                    window.location.href = `addBook.html?isbn=${isbn}`;
+                    window.location.href = `addBook.html?isbn=${isbn}&store_id=1`;
                 } else if (response.ok) {
                     response.json().then(data => {
                         const book_id = data.book_id;
-                        window.location.href = `addBookCopy.html?book_id=${book_id}`;
+                        window.location.href = `addBookCopy.html?book_id=${book_id}&store_id=1`;
                     });
                 } else {
                     throw new Error("Unexpected response from server");

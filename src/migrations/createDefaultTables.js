@@ -1,4 +1,4 @@
-const pool = require('../config/db'); 
+const pool = require('../config/db');
 
 const createDefaultTables = async () => {
   const client = await pool.connect();
@@ -47,13 +47,13 @@ const createDefaultTables = async () => {
         FOREIGN KEY (category_id) REFERENCES Category
       );
 
-     CREATE TABLE IF NOT EXISTS Store (
-    	store_id SERIAL PRIMARY KEY,
-    	name VARCHAR(30) NOT NULL UNIQUE,
-    	address VARCHAR(50) NOT NULL,
-    	website VARCHAR(100) NOT NULL,
-    	role INT NOT NULL
-	);
+      CREATE TABLE IF NOT EXISTS Store (
+        store_id SERIAL PRIMARY KEY,
+        name VARCHAR(30) NOT NULL UNIQUE,
+        address VARCHAR(50) NOT NULL,
+        website VARCHAR(100) NOT NULL,
+        role INT NOT NULL
+      );
 
       CREATE TABLE IF NOT EXISTS BookCopy (
         copy_id SERIAL PRIMARY KEY,
@@ -87,20 +87,20 @@ const createDefaultTables = async () => {
 
     await client.query(`
       INSERT INTO Type (type_name) VALUES 
-      	('romance'),
-		    ('history'),
-		    ('detective'),
-		    ('humor'),
-		    ('guide')
+        ('romance'),
+        ('history'),
+        ('detective'),
+        ('humor'),
+        ('guide')
       ON CONFLICT (type_name) DO NOTHING;
-	`);
+    `);
 
-	await client.query(`
-		INSERT INTO Category (category_name) VALUES 
-      ('novel'),
-		  ('comic'),
-		  ('non-fiction')
-    ON CONFLICT (category_name) DO NOTHING;
+    await client.query(`
+      INSERT INTO Category (category_name) VALUES 
+        ('novel'),
+        ('comic'),
+        ('non-fiction')
+      ON CONFLICT (category_name) DO NOTHING;
     `);
 
     await client.query(`
@@ -134,28 +134,21 @@ const createDefaultTables = async () => {
     `);
 
     await client.query(`
-    INSERT INTO Customer (name, address, postal_code, email, password) VALUES
-    ('Matti Meik l inen', 'Esimerkkikatu 1, 00100 Helsinki', '12345', 'matti.meikalainen@example.com', 'salasana123'),
-    ('Anna Esimerkki', 'Testikatu 5, 00200 Helsinki', '23456', 'anna.esimerkki@example.com', 'annaSalasana456'),
-    ('Pekka Malli', 'Mallitie 7, 00300 Helsinki', '34567', 'pekka.malli@example.com', 'pekkaMalli789'),
-    ('Laura N yte', 'N ytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
-    ('Janne Testi', 'Testikatu 12, 00500 Helsinki', '56789', 'janne.testi@example.com', 'janneTesti345')
-    ON CONFLICT (email) DO NOTHING;
-    `);
-
-
-    await client.query(`
-      INSERT INTO ShippingRates (weight_limit, price) VALUES
-      (50, 2.50), (250, 5.00), (10, 10.00), (20, 15.00)
-      ON CONFLICT (weight_limit) DO NOTHING;
-    `);
-
-    await client.query(`
       INSERT INTO Store (name, address, website, role) VALUES
       ('Keskusdivari', 'Esimerkkikatu 1, Helsinki', 'https://keskusdivari.example.com', 1),
       ('Divari', 'Esimerkkikatu 2, Helsinki', 'https://divari.example.com', 2)
       ON CONFLICT (name) DO NOTHING;
-    `);    
+    `);
+
+    await client.query(`
+      INSERT INTO BookCopy (book_id, store_id, order_id, purchase_price, selling_price, status, timestamp, sale_time)
+      VALUES
+      ((SELECT book_id FROM Book WHERE isbn = '9155430674'), 
+       (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), NULL, 10.00, 15.00, 0, NOW(), NOW()),
+      ((SELECT book_id FROM Book WHERE isbn = '9156381451'), 
+       (SELECT store_id FROM Store WHERE name = 'Divari'), NULL, 12.00, 18.00, 0, NOW(), NOW())
+      ON CONFLICT DO NOTHING;
+    `);
 
     console.log('Tables created and default data inserted successfully');
   } catch (err) {

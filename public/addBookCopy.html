@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Book Copy</title>
+    <title>Add Book</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,13 +50,14 @@
 
             const purchase_price = document.getElementById("purchase_price").value;
             const selling_price = document.getElementById("selling_price").value;
-
+	
 	    const urlParams = new URLSearchParams(window.location.search);
-            const bookId = urlParams.get('book_id');            
-	    
+		const bookId = urlParams.get('book_id'); 
+		const storeId = urlParams.get('store_id');
 
             const bookCopyData = {
                 book_id: bookId,
+		store_id: storeId,
                 purchase_price: purchase_price,
 		selling_price: selling_price
             };

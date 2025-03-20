@@ -13,7 +13,6 @@ const customerRoutes = require('./src/api/customerRoutes');
 app.use('/api', customerRoutes);
 
 app.get('/', (req, res) => {
-  //res.send('Hello from Node.js server!');
   res.sendFile(__dirname + '/public/index.html');
 });
 
