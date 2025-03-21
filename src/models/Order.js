@@ -66,22 +66,24 @@ const countShippingCosts = async (order_id) => {
 			return null;
     	} 
         const total_weight = orderCheck.rows[0].total_weight;
-		if (total_weight === 0) {
+		if (total_weight > 0) {
+			const weight_limits_result = await pool.query('SELECT weight_limit FROM ShippingRates WHERE weight_limit >= $1 ORDER BY weight_limit ASC LIMIT 1', [total_weight]);
+        	if (weight_limits_result.rows.length > 0) {
+           		const weight_limit = weight_limits_result.rows[0].weight_limit;
+            	const shipping_rate_result = await pool.query('SELECT price FROM ShippingRates WHERE weight_limit = $1', [weight_limit]);
+            	const shipping_cost = shipping_rate_result.rows[0].price;
+				await pool.query('UPDATE BookOrder SET costs = $1 WHERE order_id = $2', [shipping_cost, order_id]);
+            	console.log(`The shipping cost for order ${order_id} is ${shipping_cost} based on a total weight of ${total_weight} kg.`);
+            	return shipping_cost;
+        	} else {
+            	// weight over the limits
+				console.log(`Weight ${total_weight} is too much to send in one shipment`)
+            	return null;
+        	}
+		} else {
 			console.log(`The order ${order_id} does not have any items.`);
-			return 0;
+			return "0.00";
 		}
-        const weight_limits_result = await pool.query('SELECT weight_limit FROM ShippingRates WHERE weight_limit >= $1 ORDER BY weight_limit ASC LIMIT 1', [total_weight]);
-        if (weight_limits_result.rows.length > 0) {
-            const weight_limit = weight_limits_result.rows[0].weight_limit;
-            const shipping_rate_result = await pool.query('SELECT price FROM ShippingRates WHERE weight_limit = $1', [weight_limit]);
-            const shipping_cost = shipping_rate_result.rows[0].price;
-			await pool.query('UPDATE BookOrder SET costs = $1 WHERE order_id = $2', [shipping_cost, order_id]);
-            console.log(`The shipping cost for order ${order_id} is ${shipping_cost} based on a total weight of ${total_weight} kg.`);
-            return shipping_cost;
-        } else {
-            // weight over the limits
-            return null;
-        }
     } catch (error) {
         console.log('Error counting shipment costs:', error);
         throw error;
@@ -132,7 +134,7 @@ const removeFromOrder = async (copy_id) => {
             const book_id = copyCheck.rows[0].book_id;
             // const weight = await Book.getBookWeightById(book_id);
 			const weight = 0.25; // for testing
-            await pool.query ('UPDATE BookOrder SET total_weight = total_weight - $1 WHERE order_id = $2', [weight, order_id])
+            await pool.query ('UPDATE BookOrder SET total_weight = total_weight - $1 WHERE order_id = $2', [weight, order_id]);
             await pool.query('UPDATE BookCopy SET status = 0, order_id = NULL WHERE copy_id = $1', [copy_id]);
             console.log(`Book copy ${copy_id} removed from the order ${order_id}.`);
             return true;
@@ -147,6 +149,33 @@ const removeFromOrder = async (copy_id) => {
 };
 
 
-// shipOrder = async (order_id) => {};
+const shipOrder = async (order_id) => {
+	try {
+		const orderCheck = await pool.query('SELECT * FROM BookOrder WHERE order_id = $1', [order_id]);
+    	if (orderCheck.rows.length === 0) {
+			console.log(`Order ${order_id} does not exist.`);
+			return false;
+    	}
+		const itemCheck = await pool.query('SELECT copy_id FROM BookCopy WHERE order_id = $1', [order_id]);
+		if (itemCheck.rows.length === 0) {
+			console.log(`Order ${order_id} does not have any items.`);
+			return false;
+		}
+		const status = orderCheck.rows[0].status;
+		if(!status) {
+			await pool.query ('UPDATE BookOrder SET status = 1 WHERE order_id = $1', [order_id]);
+			const copyIds = itemCheck.rows.map(row => row.copy_id);
+            await pool.query('UPDATE BookCopy SET status = 2 WHERE copy_id = ANY($1::int[])', [copyIds]);			console.log(`Order ${order_id} has been shipped.`);
+			console.log(`Order ${order_id} has been shipped.`);
+			return true;
+		} else {
+			console.log(`No available order with id ${order_id} to ship.`);
+			return false;
+		}
+	} catch (error) {
+		console.log('Error shipping order.');
+		throw error;
+	}
+};
 
-module.exports = {getOrderById, getAllOrders, createOrder, countShippingCosts, addToOrder, removeFromOrder}
+module.exports = {getOrderById, getAllOrders, createOrder, countShippingCosts, addToOrder, removeFromOrder, shipOrder}

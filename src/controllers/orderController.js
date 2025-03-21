@@ -55,7 +55,7 @@ const createOrder = async (req,res) => {
   	}
 };
 
-//not tested
+// tested and works
 const countShippingCosts = async (req, res) => {
 	const { order_id } = req.query;
 	if(!order_id) {
@@ -115,4 +115,23 @@ const removeFromOrder = async (req, res) => {
   }
 };
 
-module.exports = {getAllOrders, getOrderById, createOrder, countShippingCosts, addToOrder, removeFromOrder};
+const shipOrder = async (req, res) => {
+	const { order_id } = req.query;
+	if(!order_id) {
+		return res.status(400).json({error: "Order id is required" });
+	} 
+	try {
+		const result = await Order.shipOrder(order_id);
+		if(result){
+			res.status(200).json({ message: `Order ${order_id} has been shipped.` });
+		} else {
+      		res.status(404).json({ error: "Failed to ship the order." });
+    	}
+	} catch (error) {
+    	console.error("Error shipping order:", error.message);
+    	res.status(500).json({ error: "Internal Server Error" });
+  	}
+};
+
+
+module.exports = {getAllOrders, getOrderById, createOrder, countShippingCosts, addToOrder, removeFromOrder, shipOrder};
