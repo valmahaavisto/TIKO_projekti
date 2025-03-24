@@ -55,21 +55,22 @@ const createDefaultTables = async () => {
         role INT NOT NULL
       );
 
-      CREATE TABLE IF NOT EXISTS BookCopy (
-        copy_id SERIAL PRIMARY KEY,
-        book_id INT NOT NULL,
-        store_id INT NOT NULL,
-        order_id INT DEFAULT 0,
-        status INT DEFAULT 0,
-        purchase_price DECIMAL (5,2) NOT NULL,
-        selling_price DECIMAL (5,2) NOT NULL,
-        timestamp TIMESTAMP DEFAULT NULL,
-        sale_time TIMESTAMP NOT NULL,
-        CHECK (status IN (0,1,2)),
-        FOREIGN KEY (book_id) REFERENCES Book,
-        FOREIGN KEY (store_id) REFERENCES Store,
-        FOREIGN KEY (order_id) REFERENCES BookOrder
-      );
+    CREATE TABLE IF NOT EXISTS BookCopy (
+      copy_id SERIAL PRIMARY KEY,
+      book_id INT NOT NULL,
+      store_id INT NOT NULL,
+      order_id INT DEFAULT 0,
+      status INT DEFAULT 0,
+      purchase_price DECIMAL (5,2) NOT NULL,
+      selling_price DECIMAL (5,2) NOT NULL,
+      timestamp TIMESTAMP DEFAULT NULL,
+      sale_time TIMESTAMP NOT NULL,
+      CHECK (status IN (0,1,2)),
+      FOREIGN KEY (book_id) REFERENCES Book,
+      FOREIGN KEY (store_id) REFERENCES Store,
+      FOREIGN KEY (order_id) REFERENCES BookOrder,
+      UNIQUE (book_id, store_id, order_id) -- Add UNIQUE constraint
+    );
 
       CREATE TABLE IF NOT EXISTS Shipment (
         shipment_id SERIAL PRIMARY KEY,
@@ -83,6 +84,34 @@ const createDefaultTables = async () => {
         weight_limit DECIMAL (5,2) PRIMARY KEY,
         price DECIMAL (5,2) NOT NULL
       );
+    `);
+
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1
+          FROM pg_constraint
+          WHERE conname = 'unique_order'
+        ) THEN
+          ALTER TABLE BookOrder
+          ADD CONSTRAINT unique_order UNIQUE (customer_id, confirmation_time);
+        END IF;
+      END $$;
+    `);
+
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1
+          FROM pg_constraint
+          WHERE conname = 'unique_bookcopy'
+        ) THEN
+          ALTER TABLE BookCopy
+          ADD CONSTRAINT unique_bookcopy UNIQUE (book_id, store_id, order_id);
+        END IF;
+      END $$;
     `);
 
     await client.query(`
@@ -177,28 +206,27 @@ const createDefaultTables = async () => {
       ON CONFLICT (customer_id, confirmation_time) DO NOTHING;
     `);  
     
-    await client.query(`
-      INSERT INTO BookCopy (book_id, store_id, order_id, status, purchase_price, selling_price, sale_time)
-      VALUES
-        ((SELECT book_id FROM Book WHERE isbn = '9155430674'), 
-         (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
-         (SELECT order_id FROM BookOrder WHERE customer_id = 1 LIMIT 1), 
-         0, 10.00, 15.00, '2024-01-10 10:00:00'),
-        ((SELECT book_id FROM Book WHERE isbn = '9156381451'), 
-         (SELECT store_id FROM Store WHERE name = 'Divari'), 
-         (SELECT order_id FROM BookOrder WHERE customer_id = 1 LIMIT 1), 
-         1, 12.00, 18.00, '2024-02-10 11:15:00'),
-        ((SELECT book_id FROM Book WHERE isbn = '1995'), 
-         (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
-         (SELECT order_id FROM BookOrder WHERE customer_id = 2 LIMIT 1), 
-         0, 8.00, 12.00, '2024-03-12 13:00:00'),
-        ((SELECT book_id FROM Book WHERE isbn = '1940'), 
-         (SELECT store_id FROM Store WHERE name = 'Divari'), 
-         (SELECT order_id FROM BookOrder WHERE customer_id = 2 LIMIT 1), 
-         1, 9.50, 14.50, '2024-04-05 14:00:00')
-      ON CONFLICT DO NOTHING;
-    `);
-    
+  await client.query(`
+    INSERT INTO BookCopy (book_id, store_id, order_id, status, purchase_price, selling_price, sale_time)
+    VALUES
+      ((SELECT book_id FROM Book WHERE isbn = '9155430674'), 
+      (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
+      (SELECT order_id FROM BookOrder WHERE customer_id = 1 LIMIT 1), 
+      0, 10.00, 15.00, '2024-01-10 10:00:00'),
+      ((SELECT book_id FROM Book WHERE isbn = '9156381451'), 
+      (SELECT store_id FROM Store WHERE name = 'Divari'), 
+      (SELECT order_id FROM BookOrder WHERE customer_id = 1 LIMIT 1), 
+      1, 12.00, 18.00, '2024-02-10 11:15:00'),
+      ((SELECT book_id FROM Book WHERE isbn = '1995'), 
+      (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
+      (SELECT order_id FROM BookOrder WHERE customer_id = 2 LIMIT 1), 
+      0, 8.00, 12.00, '2024-03-12 13:00:00'),
+      ((SELECT book_id FROM Book WHERE isbn = '1940'), 
+      (SELECT store_id FROM Store WHERE name = 'Divari'), 
+      (SELECT order_id FROM BookOrder WHERE customer_id = 2 LIMIT 1), 
+      1, 9.50, 14.50, '2024-04-05 14:00:00')
+    ON CONFLICT (book_id, store_id, order_id) DO NOTHING; -- Use the UNIQUE constraint columns
+  `);    
 
     console.log('Tables created and default data inserted successfully');
   } catch (err) {

@@ -133,12 +133,13 @@ try {
       counter++;
     }
     if (type) {
-      query += ` AND type = $${counter}`;
+      query += ` AND type_id = (SELECT type_id FROM Type WHERE type_name = $${counter})`;
       values.push(type);
       counter++;
     }
+
     if (category) {
-      query += ` AND category = $${counter}`;
+      query += ` AND category_id = (SELECT category_id FROM Category WHERE category_name = $${counter})`;
       values.push(category);
       counter++;
     }
