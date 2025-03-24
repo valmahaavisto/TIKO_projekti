@@ -55,6 +55,24 @@ const createOrder = async (req,res) => {
   	}
 };
 
+const getOrderId = async(req, res) => {
+	const {customer_id} = req.query;
+	if (!customer_id) {
+		return res.status(400).json({error: "Customer id is required." });
+	}
+	try {
+		const result = await Order.getOrderId(customer_id);
+		if(result) {
+			res.status(200).json({message: `Order id got for customer ${customer_id}.`});
+		} else {
+			res.status(404).json({ error: "Failed to get order id for customer." });
+		}
+	} catch (error) {
+    	console.error("Error getting order id:", error.message);
+   		res.status(500).json({ error: "Internal Server Error" });
+  	}
+};
+
 // tested and works
 const countShippingCosts = async (req, res) => {
 	const { order_id } = req.query;
@@ -134,4 +152,4 @@ const shipOrder = async (req, res) => {
 };
 
 
-module.exports = {getAllOrders, getOrderById, createOrder, countShippingCosts, addToOrder, removeFromOrder, shipOrder};
+module.exports = {getAllOrders, getOrderById, createOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder};

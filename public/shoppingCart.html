@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Page</title>
+    <title>Shopping Cart</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,15 +28,20 @@
         th {
             background-color: #007bff;
             color: white;
-            cursor: pointer; 
+            cursor: pointer;
+        }
+        .summary {
+            margin-top: 20px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-	<p>Rooli: Asiakas </p>
-	<button onclick="window.location.href='index.html'">Vaihda Rooli</button>
-	<button onclick="window.location.href='search.html'">Takaisin hakuun</button>
-	<h2>Ostoskori</h2>
+    <p>Rooli: Asiakas</p>
+    <button onclick="window.location.href='index.html'">Vaihda Rooli</button>
+    <button onclick="window.location.href='search.html'">Takaisin hakuun</button>
+    
+    <h2>Ostoskorin sisältö</h2>
     <table id="cart-table">
         <thead>
             <tr>
@@ -45,86 +50,84 @@
                 <th>Toiminnot</th>
             </tr>
         </thead>
-        <tbody id="cart-body">
-            <!-- Items will be dynamically added here -->
-        </tbody>
+        <tbody id="cart-body"></tbody>
     </table>
-
-	<div class="summary">
+    
+    <div class="summary">
         <p>Välisumma: <span id="total-price">0.00</span> &#8364</p>
         <p>Toimituskulut: <span id="shipping-cost">0.00</span> &#8364</p>
         <p>Kokonaissumma: <span id="final-price">0.00</span> &#8364</p>
     </div>
 
-	<button>Tilaa</button>
+    <button type="button" onclick="shipOrder()">Tilaa</button>
+    
+    <script>
+        let cart = [];
 
-	<script>
-        async function fetchCartItems(orderId) {
+        async function fetchOrderId(customerId) {
+            fetch(`/api/orders/getOrderId?customer_id=${customerId}`)
+            .then(response => response.json())
+            .then(data => fetchOrder(data))
+            .catch(error => console.error("Error fetching order id:", error));
+        }
+
+        async function fetchOrder(orderId) {
+            fetch(`/api/orders/getOrderById?order_id=${orderId}`)
+            .then(response => response.json())
+            .then(data => updateCartItems(data))
+            .catch(error => console.error("Error fetching order by id:", error));
+        }
+
+        async function fetchShippingCosts(orderId) {
             try {
-                const response = await fetch(`/api/orders/getOrderById?order_id=${orderId}`);
-                if (response.ok) {
-					const bookCopies = await response.json();
-                    let totalPrice = 0;
-					let shippingCost = 0;
-                    const cartTable = document.getElementById("cart-body");
-                    cartTable.innerHTML = ""; // Clear previous items
-
-                    for (const copy of bookCopies){
-                        const bookResponse = await fetch(`/api/books/${copy.book_id}`);
-                        if (!bookResponse.ok) {
-                    		console.error(`Failed to fetch book details for ID ${copy.book_id}`);
-                    		continue;
-               			}
-                		const book = await bookResponse.json();
-                        totalPrice += book.price;
-
-						const row = `<tr>
-                        	<td>${book.title}</td>
-                        	<td>${book.author}</td>
-                        	<td>${book.price.toFixed(2)} &#8364</td>
-                    		</tr>`;
-                		tableBody.innerHTML += row;
-                    };
-
-                    
-                    fetchShippingCost(orderId, totalPrice);
-
-					document.getElementById("total-price").innerText = totalPrice.toFixed(2) + " &#8364";
-            		document.getElementById("shipping-cost").innerText = shippingCost.toFixed(2) + " &#8364";
-            		document.getElementById("total-sum").innerText = (totalPrice + shippingCost).toFixed(2) + " �";
-                } else {
-                    console.error("Error fetching cart items:", data.error);
-                }
+                const response = await fetch(`/api/orders/getShippingCosts?order_id=${orderId}`);
+                if (!response.ok) throw new Error('Failed to fetch shipping costs');
+                const shippingCost = await response.json();
+                return shippingCost;
             } catch (error) {
-                console.error("Error:", error);
+                console.error('Error fetching shipping costs:', error);
             }
         }
 
-        // Fetch shipping cost from backend
-        async function fetchShippingCost(orderId, totalPrice) {
-            try {
-                const response = await fetch(`/api/orders/countShippingCosts?order_id=${orderId}`);
-                const data = await response.json();
-                if (response.ok) {
-                    const shippingCost = data.shipping_cost;
-                    document.getElementById("shipping-cost").textContent = `Shipping: $${shippingCost.toFixed(2)}`;
-                    updateTotal(totalPrice, shippingCost);
-                } else {
-                    console.error("Error fetching shipping cost:", data.error);
-                }
-            } catch (error) {
-                console.error("Error:", error);
+        async function updateCartItems(data) {
+            const cartBody = document.getElementById("cart-body");
+            cartBody.innerHTML = "";
+            let totalPrice = 0;
+
+            for (const item of data) {
+                const bookData = await (await fetch(`/api/books/getBookWithId?id=${item.book_id}`)).json();
+                const copyData = await (await fetch (`/api/books/getCopyWithId?id=${item.copy_id}`)).json();
+                price = copyData.selling_price;
+                totalPrice += price;
+                cartBody.innerHTML += `<tr>
+                    <td>${bookData.title}</td>
+                    <td>${price.toFixed(2)} &#8364</td>
+                    <td><button onclick="removeFromCart(${item.copy_id})">Poista</button></td>
+                </tr>`;
             }
+            const shippingCost = await fetchShippingCosts(orderId);
+            updateSummary(shippingCost, totalPrice);
         }
 
-        // Update the final total price
-        function updateTotal(totalPrice, shippingCost) {
-            const finalTotal = totalPrice + shippingCost;
-            document.getElementById("final-price").textContent = `Final Total: $${finalTotal.toFixed(2)}`;
+        function updateSummary(shippingCost, totalPrice) {
+            document.getElementById("total-price").innerText = totalPrice.toFixed(2);
+            document.getElementById("shipping-cost").innerText = shippingCost.toFixed(2);
+            document.getElementById("final-price").innerText = (totalPrice + shippingCost).toFixed(2);
         }
 
-        fetchCartItems(1);
+        async function removeFromCart(copyId) {
+            await fetch(`/api/orders/removeFromOrder?copy_id=${copyId}`, { method: 'POST' });
+            cart = cart.filter(item => item.copy_id !== copyId);
+            updateCartItems();
+        }
+
+        async function shipOrder() {
+            const orderId = await fetchOrderId(prompt("Syötä asiakas ID:")); // for testing
+            await fetch(`/api/orders/shipOrder?order_id=${orderId}`, { method: 'POST' });
+            alert("Tilaus lähetetty!");
+            document.getElementById("cart-body").innerHTML = "";
+            updateSummary(0, 0);
+        }
     </script>
-
 </body>
 </html>

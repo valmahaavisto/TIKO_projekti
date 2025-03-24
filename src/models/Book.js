@@ -27,6 +27,25 @@ const getAllBookCopies = async (bookId = null) => {
     }
 };
 
+const getBookById = async (id) => {
+  try {
+    const result = await pool.query(`SELECT * FROM Book WHERE book_id = $1`, [id]);
+    return result.rows.length > 0 ? result.rows[0] : null;
+  } catch (error) {
+    console.error("Error fetching book by ID:", error);
+    throw error;
+  }
+}
+
+const getBookCopyById = async (id) => {
+  try {
+    const result = await pool.query(`SELECT * FROM BookCopy WHERE copy_id = $1`, [id]);
+    return result.rows.length > 0 ? result.rows[0] : null;
+  } catch (error) {
+    console.error("Error fetching copy by ID:", error);
+    throw error;
+  }
+}
 
 const getBookWeightById = async (id) => {
   try {
@@ -151,4 +170,4 @@ try {
   }
 };
 
-module.exports = { getAllBooks, getAllBookCopies, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };
+module.exports = { getAllBooks, getAllBookCopies, getBookById, getBookCopyById, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };

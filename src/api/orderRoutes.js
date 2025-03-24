@@ -17,6 +17,10 @@ router.post('/orders/createOrder', (req,res) => {
 	orderController.createOrder(req,res);
 });
 
+router.get('/orders/getOrderId', (req,res) => {
+	console.log('Incoming request. GET /api/orders/getOrderId');
+	orderController.getOrderId(req,res);
+});
 
 router.get('/orders/countShippingCosts', (req, res) => {
 	console.log('Incoming request. GET /api/orders/countShippingCosts');

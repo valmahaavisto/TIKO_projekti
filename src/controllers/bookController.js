@@ -30,6 +30,43 @@ const getBookCopies = async (req, res) => {
   }
 };
 
+const getBookById = async (req, res) => {
+  const { id } = req.query;
+	if(!id) {
+		return res.status(400).json({error: "Book id is required" });
+	}
+  try {
+    const book = await Book.getBookById(id);
+
+		if(book) {
+			res.status(200).json(book);
+		} else { 
+			res.status(404).json({error: "Book not found"});
+		}
+	} catch (error) {
+		console.error("Error getting book with id:", error.message);
+		res.status(500).json({error: "Internal Server Error"});
+	}
+};
+
+const getBookCopyById = async (req, res) => {
+  const { id } = req.query;
+	if(!id) {
+		return res.status(400).json({error: "Copy id is required" });
+	}
+  try {
+    const copy = await Book.getBookCopyById(id);
+
+		if(copy) {
+			res.status(200).json(copy);
+		} else { 
+			res.status(404).json({error: "Book copy not found"});
+		}
+	} catch (error) {
+		console.error("Error getting book copy with id:", error.message);
+		res.status(500).json({error: "Internal Server Error"});
+	}
+};
 
 const getBookWeightById = async (req, res) => {
   console.log(`Received GET request: /api/books/${req.params.id}`);
@@ -118,4 +155,4 @@ const getFilteredBooks = async (req, res) => {
   }
 };
 
-module.exports = { getBooks, getBookCopies, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };
+module.exports = { getBooks, getBookCopies, getBookById, getBookCopyById, getBookWeightById, getR2, addBook, addBookCopy, getBookWithISBN, getFilteredBooks };

@@ -13,6 +13,16 @@ router.get('/bookcopies', (req, res) => {
     bookController.getBookCopies(req, res);
 });
 
+router.get('/books/getBookById/', (req, res) => {
+    console.log('Incoming request: GET /api/books/getBookById');
+    bookController.getBookById(req, res);
+});
+
+router.get('/books/getBookCopyById', (req, res) => {
+    console.log('Incoming request: GET /api/books/getBookCopyById');
+    bookController.getBookCopyById(req, res);
+});
+
 router.get('/books/filtered', (req, res) => {
     console.log('Incoming request: GET /api/books/filtered');
     bookController.getFilteredBooks(req, res);
