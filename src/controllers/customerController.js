@@ -1,6 +1,28 @@
 const Customer = require('../models/Customer');
 
 
+
+const getR3 = async (req, res) => {
+    try {
+        const data = await Customer.getR3();
+        if (data === null) {
+            console.log('No data found for R3.');
+            return res.status(204).send();
+        }
+        const headers = ['asiakastunnus', 'nimi', 'lkm'];
+        const rows = (data || []).map(row => `${row.asiakastunnus},${row.nimi},${row.lkm}`); // tsekkaa matchaako kyselyn kans
+        const csvContent = [headers.join(','), ...rows].join('\n');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="raportti3.csv"');
+        console.log('R3 CSV created successfully.');
+        res.send(csvContent);
+    } catch (error) {
+        console.log('Error fetching R3: ', error);
+        res.status(500).json({error: 'Internal Server Error'});
+    }
+};
+
+
 const getCustomerByEmail = async (req, res) => {
     console.log(`Received GET request: /api/customers/${req.params.email}`);
     try {
@@ -63,6 +85,7 @@ const registerCustomer = async (req, res) => {
 };
 
 
+
 const getCustomers = async (req, res) => {
     try {
         allCustomers = await Customer.getAllCustomers();
@@ -76,4 +99,4 @@ const getCustomers = async (req, res) => {
   } 
 };
 
-module.exports = { getCustomerByEmail, getCustomerLogin, registerCustomer, getCustomers };
+module.exports = { getR3, getCustomerByEmail, getCustomerLogin, registerCustomer, getCustomers };

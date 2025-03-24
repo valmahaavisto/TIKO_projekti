@@ -104,6 +104,25 @@ const createDefaultTables = async () => {
     `);
 
     await client.query(`
+      INSERT INTO BookOrder (customer_id, confirmation_time, status, total_weight, costs)
+      VALUES
+        (1, '2024-01-15 10:30:00', 1, 2.50, 20.00),
+        (1, '2024-02-10 14:45:00', 1, 1.75, 15.00),
+        (1, NULL, 0, 2.00, 10.00),
+        (2, '2023-11-05 08:20:00', 1, 3.00, 30.50),
+        (2, '2024-01-25 16:00:00', 1, 4.00, 25.00),
+        (2, NULL, 0, 1.25, 8.75),
+        (2, '2024-03-01 12:00:00', 1, 5.25, 50.00),
+        (3, '2024-02-11 09:15:00', 1, 2.80, 22.00),
+        (3, '2024-10-20 11:10:00', 1, 3.50, 35.00),
+        (3, '2023-06-01 14:30:00', 1, 2.00, 18.50),
+        (3, '2024-04-05 15:45:00', 1, 1.50, 12.00),
+        (4, '2024-04-05 15:45:00', 0, 2.25, 10.25),
+        (4, '2024-09-18 17:10:00', 1, 2.75, 19.00);
+    `);
+
+
+    await client.query(`
       INSERT INTO Book (isbn, title, author, publication_year, weight, type_id, category_id)
       VALUES
       ('9155430674', 'Elektran tyt r', 'Madeleine Brent', 1986, 0.5, 

@@ -55,11 +55,40 @@ const registerNewCustomer = async (name, address, postalCode, email, password) =
 };
 
 
-// Order by last year order count
-// const getCustomersByLastYearOrders
+// get last year orders grouped by customer
+const getR3 = async () => {
+    try {
+        const result = await pool.query(`
+            SELECT
+                Customer.customer_id AS asiakastunnus,
+                Customer.name AS nimi,
+                count(*) as lkm
+            FROM
+                Customer
+            INNER JOIN
+                BookOrder
+            ON
+                Customer.customer_id = BookOrder.customer_id
+            WHERE
+                confirmation_time >= DATE(EXTRACT(YEAR FROM CURRENT_DATE) - 1 || '-01-01') 
+                AND confirmation_time < DATE(EXTRACT(YEAR FROM CURRENT_DATE) || '-01-01')
+                AND confirmation_time IS NOT NULL
+            GROUP BY
+                Customer.customer_id, Customer.name
+            ORDER BY
+                Customer.name ASC;
+            `);
+        if (result.rows.length === 0) {
+            return null;
+        }
+        return result.rows;
+    } catch (error) {
+        console.log('Error fetching R3: ', error)
+        throw error;
+    }
+};
 
-
-
+// Not needed, for testing
 const getAllCustomers = async () => {
     try {
         const result = await pool.query('SELECT * FROM Customer ORDER BY customer_id');
@@ -73,4 +102,4 @@ const getAllCustomers = async () => {
     }
 };
 
-module.exports = {getCustomerByEmail, getCustomerLogin, registerNewCustomer, getAllCustomers};
+module.exports = {getCustomerByEmail, getCustomerLogin, registerNewCustomer, getR3, getAllCustomers};
