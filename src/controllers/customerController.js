@@ -10,12 +10,12 @@ const getR3 = async (req, res) => {
             return res.status(204).send();
         }
         const headers = ['asiakastunnus', 'nimi', 'lkm'];
-        const rows = (data || []).map(row => `${row.asiakastunnus},${row.nimi},${row.lkm}`); // tsekkaa matchaako kyselyn kans
+        const rows = (data || []).map(row => `${row.asiakastunnus},${row.nimi},${row.lkm}`);
         const csvContent = [headers.join(','), ...rows].join('\n');
-        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', 'attachment; filename="raportti3.csv"');
         console.log('R3 CSV created successfully.');
-        res.send(csvContent);
+        res.send(Buffer.from(csvContent, 'utf8'));
     } catch (error) {
         console.log('Error fetching R3: ', error);
         res.status(500).json({error: 'Internal Server Error'});

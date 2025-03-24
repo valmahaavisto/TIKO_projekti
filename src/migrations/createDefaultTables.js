@@ -103,23 +103,16 @@ const createDefaultTables = async () => {
     ON CONFLICT (category_name) DO NOTHING;
     `);
 
+
     await client.query(`
-      INSERT INTO BookOrder (customer_id, confirmation_time, status, total_weight, costs)
-      VALUES
-        (1, '2024-01-15 10:30:00', 1, 2.50, 20.00),
-        (1, '2024-02-10 14:45:00', 1, 1.75, 15.00),
-        (1, NULL, 0, 2.00, 10.00),
-        (2, '2023-11-05 08:20:00', 1, 3.00, 30.50),
-        (2, '2024-01-25 16:00:00', 1, 4.00, 25.00),
-        (2, NULL, 0, 1.25, 8.75),
-        (2, '2024-03-01 12:00:00', 1, 5.25, 50.00),
-        (3, '2024-02-11 09:15:00', 1, 2.80, 22.00),
-        (3, '2024-10-20 11:10:00', 1, 3.50, 35.00),
-        (3, '2023-06-01 14:30:00', 1, 2.00, 18.50),
-        (3, '2024-04-05 15:45:00', 1, 1.50, 12.00),
-        (4, '2024-04-05 15:45:00', 0, 2.25, 10.25),
-        (4, '2024-09-18 17:10:00', 1, 2.75, 19.00);
-    `);
+      INSERT INTO Customer (name, address, postal_code, email, password) VALUES
+      ('Matti Meik l inen', 'Esimerkkikatu 1, 00100 Helsinki', '12345', 'matti.meikalainen@example.com', 'salasana123'),
+      ('Anna Esimerkki', 'Testikatu 5, 00200 Helsinki', '23456', 'anna.esimerkki@example.com', 'annaSalasana456'),
+      ('Pekka Malli', 'Mallitie 7, 00300 Helsinki', '34567', 'pekka.malli@example.com', 'pekkaMalli789'),
+      ('Laura N yte', 'N ytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
+      ('Janne Testi', 'Testikatu 12, 00500 Helsinki', '56789', 'janne.testi@example.com', 'janneTesti345')
+      ON CONFLICT (email) DO NOTHING;
+      `);
 
 
     await client.query(`
@@ -152,16 +145,6 @@ const createDefaultTables = async () => {
       ON CONFLICT (isbn) DO NOTHING;
     `);
 
-    await client.query(`
-    INSERT INTO Customer (name, address, postal_code, email, password) VALUES
-    ('Matti Meik l inen', 'Esimerkkikatu 1, 00100 Helsinki', '12345', 'matti.meikalainen@example.com', 'salasana123'),
-    ('Anna Esimerkki', 'Testikatu 5, 00200 Helsinki', '23456', 'anna.esimerkki@example.com', 'annaSalasana456'),
-    ('Pekka Malli', 'Mallitie 7, 00300 Helsinki', '34567', 'pekka.malli@example.com', 'pekkaMalli789'),
-    ('Laura N yte', 'N ytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
-    ('Janne Testi', 'Testikatu 12, 00500 Helsinki', '56789', 'janne.testi@example.com', 'janneTesti345')
-    ON CONFLICT (email) DO NOTHING;
-    `);
-
 
     await client.query(`
       INSERT INTO ShippingRates (weight_limit, price) VALUES
@@ -174,7 +157,45 @@ const createDefaultTables = async () => {
       ('Keskusdivari', 'Esimerkkikatu 1, Helsinki', 'https://keskusdivari.example.com', 1),
       ('Divari', 'Esimerkkikatu 2, Helsinki', 'https://divari.example.com', 2)
       ON CONFLICT (name) DO NOTHING;
-    `);    
+    `); 
+
+        
+    await client.query(`
+      INSERT INTO BookOrder (customer_id, confirmation_time, status, total_weight, costs)
+      VALUES
+        (1, '2024-01-15 10:30:00', 1, 2.50, 20.00),
+        (1, '2024-02-10 14:45:00', 1, 1.75, 15.00),
+        (2, '2024-03-05 08:20:00', 1, 3.00, 30.50),
+        (2, '2024-01-25 16:00:00', 1, 4.00, 25.00),
+        (3, '2024-04-05 14:30:00', 1, 5.25, 50.00),
+        (4, '2024-02-11 09:15:00', 1, 2.80, 22.00),
+        (2, '2024-03-01 12:00:00', 1, 3.00, 27.50),
+        (4, '2024-03-20 11:00:00', 1, 2.75, 22.50),
+        (1, '2024-04-10 17:10:00', 1, 3.50, 30.00),
+        (2, '2024-03-25 18:20:00', 1, 4.25, 35.00),
+        (3, '2024-04-15 16:30:00', 1, 2.50, 20.50),
+        (4, '2024-03-15 10:00:00', 1, 2.00, 18.00)
+      ON CONFLICT (customer_id, confirmation_time) DO NOTHING;
+    `);  
+    
+    await client.query(`
+      INSERT INTO BookCopy (book_id, store_id, order_id, status, purchase_price, selling_price, sale_time)
+      VALUES
+        (1, 1, 25, 0, 10.00, 15.00, '2024-01-10 10:00:00'),
+        (1, 2, 26, 1, 12.00, 18.00, '2024-02-10 11:15:00'),
+        (2, 1, 27, 0, 8.00, 12.00, '2024-03-12 13:00:00'),
+        (2, 2, 28, 1, 9.50, 14.50, '2024-04-05 14:00:00'),
+        (3, 1, 29, 0, 11.00, 16.00, '2024-05-20 15:30:00'),
+        (3, 2, 30, 1, 13.00, 19.00, '2024-06-25 16:30:00'),
+        (4, 1, 31, 0, 10.50, 16.50, '2024-07-10 17:00:00'),
+        (4, 2, 32, 1, 14.00, 20.00, '2024-08-15 18:15:00'),
+        (5, 1, 33, 0, 9.00, 13.50, '2024-09-05 19:00:00'),
+        (5, 2, 34, 1, 12.00, 17.50, '2024-10-10 20:30:00'),
+        (6, 1, 35, 0, 7.50, 11.00, '2024-11-12 21:00:00'),
+        (6, 2, 36, 1, 10.00, 15.00, '2024-12-20 22:30:00')
+      ON CONFLICT (book_id, store_id, order_id) DO NOTHING;
+    `);
+    
 
     console.log('Tables created and default data inserted successfully');
   } catch (err) {

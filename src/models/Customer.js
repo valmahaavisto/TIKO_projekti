@@ -55,28 +55,33 @@ const registerNewCustomer = async (name, address, postalCode, email, password) =
 };
 
 
-// get last year orders grouped by customer
+// get last year books grouped by customer
 const getR3 = async () => {
     try {
         const result = await pool.query(`
             SELECT
                 Customer.customer_id AS asiakastunnus,
                 Customer.name AS nimi,
-                count(*) as lkm
+                count(bookCopy.copy_id) as lkm
             FROM
                 Customer
             INNER JOIN
                 BookOrder
             ON
                 Customer.customer_id = BookOrder.customer_id
+            INNER JOIN
+                BookCopy
+            ON
+                BookOrder.order_id = BookCopy.order_id
             WHERE
-                confirmation_time >= DATE(EXTRACT(YEAR FROM CURRENT_DATE) - 1 || '-01-01') 
-                AND confirmation_time < DATE(EXTRACT(YEAR FROM CURRENT_DATE) || '-01-01')
-                AND confirmation_time IS NOT NULL
+                BookOrder.confirmation_time >= DATE(EXTRACT(YEAR FROM CURRENT_DATE) - 1 || '-01-01') 
+                AND BookOrder.confirmation_time < DATE(EXTRACT(YEAR FROM CURRENT_DATE) || '-01-01')
+                AND BookOrder.confirmation_time IS NOT NULL
+                AND BookCopy.order_id != 0
             GROUP BY
                 Customer.customer_id, Customer.name
             ORDER BY
-                Customer.name ASC;
+                Customer.customer_id ASC;
             `);
         if (result.rows.length === 0) {
             return null;
