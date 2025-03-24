@@ -33,10 +33,9 @@ router.post('/orders/removeFromOrder', (req, res) => {
     orderController.removeFromOrder(req, res);
 }); 
 
-// coming
-// router.get('/orders/shipOrder', (req, res) => {
-//     console.log('Incoming request: GET /api/orders/shipOrder');
-//     orderController.shipOrder(req, res);
-// });
+router.post('/orders/shipOrder', (req, res) => {
+	console.log('Incoming request: POST /api/orders/shipOrder');
+	orderController.shipOrder(req, res);
+});
 
 module.exports = router;

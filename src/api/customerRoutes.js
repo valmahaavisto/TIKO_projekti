@@ -5,6 +5,12 @@ const customerController = require('../controllers/customerController');
 //router.use(express.json());
 
 
+router.get('/customers/export-r3', (req, res) => {
+    console.log('Incoming request: GET /api/customers/export-r3');
+    customerController.getR3(req, res);
+});
+
+
 router.get('/customers/:email', (req, res) => {
     console.log(`Incoming request: GET /api/customers/${req.params.email}`);
     customerController.getCustomerByEmail(req, res);

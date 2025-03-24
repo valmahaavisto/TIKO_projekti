@@ -18,14 +18,11 @@
             border-radius: 5px;
         }
         input {
-            width: 100%;
+            width: 60%;
             padding: 10px;
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
-        }
-        button:hover {
-            background: darkblue;
         }
     </style>
 </head>
@@ -61,7 +58,6 @@
 
         // Redirects to customer book search page after successful login
         if (response.ok) {
-            //localStorage.setItem("token", data.token);
             window.location.href = "/search.html";
         } else {
             document.getElementById("errorMessage").style.display = "block";

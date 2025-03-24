@@ -59,6 +59,9 @@
         </tbody>
     </table>
 
+    <h3>Tuota raportti R3: Asiakkaiden viime vuonna tehtyjen tilausten lukumäärät</h3>
+    <button id="r3Btn">Lataa R3</button>
+
     <script>
 	function toggleR2Table() {
     		var table = document.getElementById("R2Table");
@@ -87,6 +90,32 @@ document.getElementById("addForm").addEventListener("submit", function (event) {
                 }
         })
         .catch(error => console.error("Error while looking for ISBN:", error));
+    });
+
+
+    // Fetch R3 data and download CSV file
+    document.getElementById('r3Btn').addEventListener('click', async function () {
+        try {
+            const response = await fetch('/api/customers/export-r3');
+            if (response.status === 204) {
+                alert('No data found for R3.');
+                return;
+            }
+            if (!response.ok) {
+                throw new Error(`Failed to download R3: ${response.status} ${response.statusText}`);
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'raportti3.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('R3 download failed:', error);
+        }
     });
 
     </script>
