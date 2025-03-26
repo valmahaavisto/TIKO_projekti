@@ -60,9 +60,25 @@ const getBookWeightById = async (id) => {
 const getR2 = async () => {
   try {
     const result = await pool.query(`
-      SELECT luokka, SUM(hinta) AS total_price, AVG(hinta) AS avg_price 
-      FROM books 
-      GROUP BY luokka
+      SELECT
+        Category.category_name AS luokka,
+        COUNT(BookCopy.copy_id) AS lkm,
+        ROUND(SUM(BookCopy.selling_price), 2) AS kokonaismyyntihinta,
+        ROUND(AVG(BookCopy.selling_price), 2) AS keskihinta
+      FROM
+        BookCopy
+      INNER JOIN
+        Book
+      ON
+        BookCopy.book_id = Book.book_id
+      INNER JOIN
+        Category
+      ON
+        Book.category_id = Category.category_id
+      GROUP BY
+        Category.category_name
+      ORDER BY
+        ROUND(SUM(BookCopy.selling_price), 2) DESC;
     `);
     return result.rows.length > 0 ? result.rows : null;
   } catch (error) {

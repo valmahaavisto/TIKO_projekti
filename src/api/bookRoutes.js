@@ -43,9 +43,13 @@ router.post('/books/addBookCopy', (req, res) => {
     bookController.addBookCopy(req, res);
 });
 
+router.get('/books/export-r2', (req, res) => {
+    console.log('Incoming request: GET /api/books/export-r2');
+    bookController.getR2(req, res);
+});
+
 
 //not yet implemented
 router.get("/:id/weight", bookController.getBookWeightById);
-router.get("/r2", bookController.getR2);
 
 module.exports = router;

@@ -87,14 +87,15 @@ const getBookWeightById = async (req, res) => {
 const getR2 = async (req, res) => {
   try {
     const result = await Book.getR2();
-    if (!result) {
-      return res.status(404).json({ error: "No data found." });
+    if (result === null) {
+      console.log('No data found for R2.');
+      return res.status(204).send();
     }
     res.json(result);
   } catch (error) {
-    console.error("Error fetching R2 data:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+    console.log('Error fetching R2: ', error);
+    res.status(500).json({error: 'Internal Server Error'});
+}
 };
 
 const addBook = async (req, res) => {

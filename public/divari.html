@@ -48,10 +48,10 @@
     <table id="R2Table" style="display:none;">
         <thead>
             <tr>
-                <th onclick="sortTable(0)">ISBN</th>
-                <th onclick="sortTable(1)">Nimi</th>
-                <th onclick="sortTable(2)">Tekijä</th>
-                <th onclick="sortTable(3)">Julkaisuvuosi</th>
+                <th onclick="sortTable(0)">Luokka</th>
+                <th onclick="sortTable(1)">Lkm</th>
+                <th onclick="sortTable(2)">Kokonaismyyntihinta</th>
+                <th onclick="sortTable(3)">Keskihinta</th>
             </tr>
         </thead>
         <tbody>
@@ -59,38 +59,73 @@
         </tbody>
     </table>
 
+
     <h3>Tuota raportti R3: Asiakkaiden viime vuonna tehtyjen tilausten lukumäärät</h3>
     <button id="r3Btn">Lataa R3</button>
 
+
     <script>
-	function toggleR2Table() {
-    		var table = document.getElementById("R2Table");
-    		if (table.style.display === "none") {
-        		table.style.display = "table"; 
-    		} else {
-        		table.style.display = "none"; 
-    		}
-	}
 
-document.getElementById("addForm").addEventListener("submit", function (event) {
-    event.preventDefault();
-    const isbn = document.getElementById("isbn").value;
+    // Fetch R2 data and upload table for it
+    let isDataLoaded = false;
+    async function toggleR2Table() {
+        const table = document.getElementById("R2Table");
+        if (table.style.display === "none") {
+            table.style.display = "table";
+            if (!isDataLoaded) {
+                try {
+                    const response = await fetch('/api/books/export-r2');
+                    const data = await response.json();
 
-    fetch(`/api/books/getBookWithISBN?isbn=${isbn}`)
-        .then(response => {
-                if (response.status === 404) {
-                    window.location.href = `addBook.html?isbn=${isbn}&store_id=1`;
-                } else if (response.ok) {
-                    response.json().then(data => {
-                        const book_id = data.book_id;
-                        window.location.href = `addBookCopy.html?book_id=${book_id}&store_id=1`;
+                    const tbody = document.querySelector("#R2Table tbody");
+                    if (!tbody) {
+                        console.error("Table body not found!");
+                        return;
+                    }
+
+                    tbody.innerHTML = ""; // Clear previous rows
+
+                    data.forEach(row => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${row.luokka}</td>
+                            <td>${row.lkm}</td>
+                            <td>${row.kokonaismyyntihinta}</td>
+                            <td>${row.keskihinta}</td>
+                        `;
+                        tbody.appendChild(tr);
                     });
-                } else {
-                    throw new Error("Unexpected response from server");
+
+                    isDataLoaded = true; // Mark data as loaded to prevent re-fetching
+                } catch (error) {
+                    console.error("Error fetching R2 data:", error);
                 }
-        })
-        .catch(error => console.error("Error while looking for ISBN:", error));
-    });
+            }
+        } else {
+            table.style.display = "none";
+        }
+    };
+
+
+    document.getElementById("addForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        const isbn = document.getElementById("isbn").value;
+
+        fetch(`/api/books/getBookWithISBN?isbn=${isbn}`)
+            .then(response => {
+                    if (response.status === 404) {
+                        window.location.href = `addBook.html?isbn=${isbn}&store_id=1`;
+                    } else if (response.ok) {
+                        response.json().then(data => {
+                            const book_id = data.book_id;
+                            window.location.href = `addBookCopy.html?book_id=${book_id}&store_id=1`;
+                        });
+                    } else {
+                        throw new Error("Unexpected response from server");
+                    }
+            })
+            .catch(error => console.error("Error while looking for ISBN:", error));
+        });
 
 
     // Fetch R3 data and download CSV file
