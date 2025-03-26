@@ -66,6 +66,36 @@
 
     <script>
 
+document.addEventListener("DOMContentLoaded", function () {
+    const message = localStorage.getItem('message');
+    const details = localStorage.getItem('details');
+
+    if (message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.style.padding = '10px';
+        messageDiv.style.marginBottom = '20px';
+        messageDiv.style.border = '1px solid';
+        messageDiv.style.borderRadius = '5px';
+
+        if (message === 'success') {
+            messageDiv.style.backgroundColor = '#d4edda';
+            messageDiv.style.color = '#155724';
+            messageDiv.style.borderColor = '#c3e6cb';
+        } else if (message === 'failure') {
+            messageDiv.style.backgroundColor = '#f8d7da';
+            messageDiv.style.color = '#721c24';
+            messageDiv.style.borderColor = '#f5c6cb';
+        }
+
+        messageDiv.textContent = details || (message === 'success' ? 'Operation successful!' : 'Operation failed.');
+        document.body.insertBefore(messageDiv, document.body.firstChild);
+
+        // Clear the message from localStorage after displaying it
+        localStorage.removeItem('message');
+        localStorage.removeItem('details');
+    }
+});
+
     // Fetch R2 data and upload table for it
     let isDataLoaded = false;
     async function toggleR2Table() {

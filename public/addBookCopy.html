@@ -45,46 +45,52 @@
     </form>
 
     <script>
-        document.getElementById("addBookCopyForm").addEventListener("submit", function (event) {
-            event.preventDefault();
+    document.getElementById("addBookCopyForm").addEventListener("submit", function (event) {
+        event.preventDefault();
 
-            const purchase_price = document.getElementById("purchase_price").value;
-            const selling_price = document.getElementById("selling_price").value;
-	
-	    const urlParams = new URLSearchParams(window.location.search);
-		const bookId = urlParams.get('book_id'); 
-		const storeId = urlParams.get('store_id');
+        const purchase_price = document.getElementById("purchase_price").value;
+        const selling_price = document.getElementById("selling_price").value;
 
-            const bookCopyData = {
-                book_id: bookId,
-		store_id: storeId,
-                purchase_price: purchase_price,
-		selling_price: selling_price
-            };
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('book_id'); 
+        const storeId = urlParams.get('store_id');
 
-            fetch('/api/books/addBookCopy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(bookCopyData) 
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Failed to add book');
-                }
-            })
-            .then(data => {
-                alert('Book added successfully!');
-                window.location.href = "divari.html"; 
-            })
-            .catch(error => {
-                console.error('Error adding book:', error);
-                alert('Failed to add book. Please try again.');
-            });
+        const bookCopyData = {
+            book_id: bookId,
+            store_id: storeId,
+            purchase_price: purchase_price,
+            selling_price: selling_price
+        };
+
+        fetch('/api/books/addBookCopy', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookCopyData) 
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to add book');
+            }
+        })
+        .then(data => {
+            // Store success message in localStorage
+	    console.log("HERE");
+            localStorage.setItem('message', 'success');
+            localStorage.setItem('details', 'Book copy added successfully!');
+            window.location.href = "divari.html";
+        })
+        .catch(error => {
+            console.error('Error adding book:', error);
+            // Store failure message in localStorage
+            localStorage.setItem('message', 'failure');
+            localStorage.setItem('details', 'Failed to add book copy. Please try again.');
+            window.location.href = "divari.html";
         });
+    });
     </script>
 </body>
 </html>

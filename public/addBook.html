@@ -107,8 +107,7 @@
             }
         })
         .then(data => {
-            const bookId = data;
-            alert('Book added successfully!');            
+            const bookId = data;          
             window.location.href = `addBookCopy.html?book_id=${bookId}&store_id=${store_id}`;
         })
         .catch(error => {
