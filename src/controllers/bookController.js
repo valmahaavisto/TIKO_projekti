@@ -18,11 +18,6 @@ const getBookCopies = async (req, res) => {
   try {
     const bookId = req.query.book_id;
     const allBooksWithCopies = await Book.getAllBookCopies(bookId);
-
-    if (!allBooksWithCopies || allBooksWithCopies.length === 0) {
-      return res.json({ message: "No book copies found" });
-    }
-
     res.json(allBooksWithCopies);
   } catch (err) {
     console.error("Error fetching all book copies:", err.message);

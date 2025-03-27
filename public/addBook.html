@@ -80,8 +80,6 @@
             const isbn = urlParams.get('isbn');
 			const store_id = urlParams.get('store_id');
 
-	    console.log(isbn);
-
             const bookData = {
                 isbn: isbn,
                 nimi: teos_nimi,
@@ -92,28 +90,19 @@
                 paino: paino
             };
 
-	fetch('/api/books/addBook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(bookData) 
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Failed to add book');
-            }
-        })
-        .then(data => {
-            const bookId = data;          
-            window.location.href = `addBookCopy.html?book_id=${bookId}&store_id=${store_id}`;
-        })
-        .catch(error => {
-            console.error('Error adding book:', error);
-            alert('Failed to add book. Please try again.');
-        });
+            // Gather the given book info to localStorage so addBookCopy can find it to add a book
+            localStorage.setItem('bookData', JSON.stringify({
+                isbn: isbn,
+                nimi: teos_nimi,
+                tekija: tekija_nimi,
+                julkaisuvuosi: teos_vuosi,
+                tyyppi: tyyppi,
+                luokka: luokka,
+                paino: paino
+            }));
+
+            window.location.href = `addBookCopy.html?book_id=undefined&store_id=${store_id}&bookToBeAdded=true`;            
+
 	});
     </script>
 </body>

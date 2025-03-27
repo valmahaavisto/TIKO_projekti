@@ -45,15 +45,55 @@
     </form>
 
     <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookToBeAdded = urlParams.get('bookToBeAdded');
+    const storeId = urlParams.get('store_id');
+    let bookId = urlParams.get('book_id');
+
+    if (bookToBeAdded === 'true') {
+        // Retrieve book data from localStorage
+        const bookData = JSON.parse(localStorage.getItem('bookData'));
+
+        if (!bookData) {
+            console.error('No book data found in localStorage.');
+            alert('Error: No book data found. Please try again.');
+            return;
+        }
+
+        fetch('/api/books/addBook', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookData)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to add book');
+            }
+        })
+        .then(data => {
+            bookId = data; 
+            addBookCopy(bookId, storeId);
+        })
+        .catch(error => {
+            console.error('Error adding book:', error);
+            alert('Failed to add book. Please try again.');
+        });
+    } else {
+        addBookCopy(bookId, storeId);
+    }
+});
+
+function addBookCopy(bookId, storeId) {
     document.getElementById("addBookCopyForm").addEventListener("submit", function (event) {
         event.preventDefault();
 
         const purchase_price = document.getElementById("purchase_price").value;
         const selling_price = document.getElementById("selling_price").value;
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const bookId = urlParams.get('book_id'); 
-        const storeId = urlParams.get('store_id');
 
         const bookCopyData = {
             book_id: bookId,
@@ -67,30 +107,36 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(bookCopyData) 
+            body: JSON.stringify(bookCopyData)
         })
         .then(response => {
             if (response.ok) {
                 return response.json();
             } else {
-                throw new Error('Failed to add book');
+                throw new Error('Failed to add book copy');
             }
         })
-        .then(data => {
-            // Store success message in localStorage
-	    console.log("HERE");
+	// store message in localStorage for search.html
+            .then(data => {
             localStorage.setItem('message', 'success');
             localStorage.setItem('details', 'Book copy added successfully!');
-            window.location.href = "divari.html";
+
+            if (storeId == 1) {
+                window.location.href = "keskusdivari.html";
+            } else if (storeId == 2) {
+                window.location.href = "divari.html";
+            } else {
+                alert("Store ID not found.");
+            }
         })
         .catch(error => {
-            console.error('Error adding book:', error);
-            // Store failure message in localStorage
+            console.error('Error adding book copy:', error);
             localStorage.setItem('message', 'failure');
             localStorage.setItem('details', 'Failed to add book copy. Please try again.');
             window.location.href = "divari.html";
         });
     });
+}
     </script>
 </body>
 </html>
