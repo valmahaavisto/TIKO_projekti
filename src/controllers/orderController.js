@@ -45,7 +45,7 @@ const createOrder = async (req,res) => {
 	try {
 		const result = await Order.createOrder(customer_id);
 		if(result) {
-			res.status(200).json({ message: `Order created for customer ${customer_id}.` });
+			res.status(200).json(result);
 		} else {
 			res.status(404).json({ error: "Failed to create an order for customer." });
 		}
@@ -61,9 +61,9 @@ const getOrderId = async(req, res) => {
 		return res.status(400).json({error: "Customer id is required." });
 	}
 	try {
-		const result = await Order.getOrderId(customer_id);
-		if(result) {
-			res.status(200).json({message: `Order id got for customer ${customer_id}.`});
+		const id = await Order.getOrderId(customer_id);
+		if(id) {
+			res.status(200).json(id);
 		} else {
 			res.status(404).json({ error: "Failed to get order id for customer." });
 		}

@@ -15,7 +15,7 @@
             text-align: center;
         }
         table {
-            width: 100%;
+            width: 90%;
             border-collapse: collapse;
             margin-top: 20px;
             background: white;
@@ -28,11 +28,26 @@
         th {
             background-color: #007bff;
             color: white;
-            cursor: pointer;
+            cursor: pointer; 
         }
-        .summary {
-            margin-top: 20px;
-            font-size: 18px;
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        } 
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="text"], select {
+            width: 50%; 
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -74,7 +89,7 @@
         async function fetchOrder(orderId) {
             fetch(`/api/orders/getOrderById?order_id=${orderId}`)
             .then(response => response.json())
-            .then(data => updateCartItems(data))
+            .then(data => updateCartItems(data, orderId))
             .catch(error => console.error("Error fetching order by id:", error));
         }
 
@@ -89,14 +104,14 @@
             }
         }
 
-        async function updateCartItems(data) {
+        async function updateCartItems(data, OrderId) {
             const cartBody = document.getElementById("cart-body");
             cartBody.innerHTML = "";
             let totalPrice = 0;
 
-            for (const item of data) {
-                const bookData = await (await fetch(`/api/books/getBookWithId?id=${item.book_id}`)).json();
-                const copyData = await (await fetch (`/api/books/getCopyWithId?id=${item.copy_id}`)).json();
+            data.forEach(item => {
+                const bookData = await (fetch(`/api/books/getBookWithId?id=${item.book_id}`).json());
+                const copyData = await(fetch(`/api/books/getCopyWithId?id=${item.copy_id}`).json());
                 price = copyData.selling_price;
                 totalPrice += price;
                 cartBody.innerHTML += `<tr>
@@ -104,7 +119,7 @@
                     <td>${price.toFixed(2)} &#8364</td>
                     <td><button onclick="removeFromCart(${item.copy_id})">Poista</button></td>
                 </tr>`;
-            }
+            });
             const shippingCost = await fetchShippingCosts(orderId);
             updateSummary(shippingCost, totalPrice);
         }
@@ -128,6 +143,7 @@
             document.getElementById("cart-body").innerHTML = "";
             updateSummary(0, 0);
         }
+        fetchOrderId(1);
     </script>
 </body>
 </html>

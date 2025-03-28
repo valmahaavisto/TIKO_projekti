@@ -23,12 +23,12 @@ const getOrderById = async (order_id) => {
             console.log(`Order ${order_id} does not exist.`);
             return null;
         }
-        console.log('Found the order with id:', order_check.rows[0]);
         const books = await pool.query('SELECT copy_id, book_id FROM BookCopy WHERE order_id = $1', [order_id]);
 		if (books.rows.length === 0) {
 			console.log(`No books in order ${order_id}.`); 
 			return [];
 		}
+		console.log(`Found order ${books.rows} with id: ${order_id}.`);
 		return books.rows;
     } catch (error) {
         console.log('Error fetching the order by id: ', error)
