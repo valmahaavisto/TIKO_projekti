@@ -8,51 +8,87 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+	    background-color: #f4f4f4;
+	    padding: 20px;
         }
         label {
-            display: block;
-            margin-top: 10px;
+            width: 150px; 
+            font-weight: bold;
         }
-        input {
+        .form-group {
+            display: flex;
+            align-items: center;
             margin-bottom: 10px;
-            padding: 5px;
-            width: 100%;
         }
         button {
-            padding: 10px;
-            background-color: #4CAF50;
+            padding: 10px 20px;
+            background-color: #007bff;
             color: white;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 14px;
+            height: 40px; 
+            width: 120px; 
+            text-align: left;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #d3d3d3; 
+            color: #808080; 
+            cursor: not-allowed;
+        }
+        input, select { 
+            padding: 8px;
+        width: 50%;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
-    <p>Rooli: rooli</p>
-    <button onclick="window.location.href='addBook.html'">Paluu</button>
-    <form id="addBookCopyForm">
+<div style="display: flex; gap: 10px; justify-content: left; margin-bottom: 30px">
+    <p id="role">Rooli: </p>
+    <button style="margin-left: 40px" onclick="window.location.href='addBook.html'">Paluu</button>
+</div>
+    <form id="addBookCopyForm" style = "background-color: #FFFFFF; padding: 20px; border-radius:10px;">
         <p>Täytä teoskappaleen hintatiedot</p>
+
+	<div class="form-group">
         <label for="purchase_price">Sisäänostohinta: </label>
         <input type="number" id="purchase_price" name="purchase_price" required>
+	</div>
 
+	<div class="form-group">
         <label for="selling_price">Myyntihinta: </label>
         <input type="number" id="selling_price" name="selling_price" required>
+	</div>
 
-        <button type="submit">Vahvista lisäys</button>
+        <button type="submit">Vahvista</button>
     </form>
 
-    <script>
+<script>
     document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     const bookToBeAdded = urlParams.get('bookToBeAdded');
     const storeId = urlParams.get('store_id');
     let bookId = urlParams.get('book_id');
 
+        const roleElement = document.getElementById("role");
+        if (storeId === "1") {
+            roleElement.textContent = "Rooli: Keskusdivari";
+        } else if (storeId === "2") {
+            roleElement.textContent = "Rooli: Divari";
+        } else {
+            roleElement.textContent = "Rooli: Tuntematon"; 
+        }
+
+
     if (bookToBeAdded === 'true') {
-        // Retrieve book data from localStorage
         const bookData = JSON.parse(localStorage.getItem('bookData'));
 
         if (!bookData) {
@@ -88,55 +124,55 @@
     }
 });
 
-function addBookCopy(bookId, storeId) {
-    document.getElementById("addBookCopyForm").addEventListener("submit", function (event) {
-        event.preventDefault();
+    function addBookCopy(bookId, storeId) {
+        document.getElementById("addBookCopyForm").addEventListener("submit", function (event) {
+            event.preventDefault();
 
-        const purchase_price = document.getElementById("purchase_price").value;
-        const selling_price = document.getElementById("selling_price").value;
+            const purchase_price = document.getElementById("purchase_price").value;
+            const selling_price = document.getElementById("selling_price").value;
 
-        const bookCopyData = {
-            book_id: bookId,
-            store_id: storeId,
-            purchase_price: purchase_price,
-            selling_price: selling_price
-        };
+            const bookCopyData = {
+                book_id: bookId,
+                store_id: storeId,
+                purchase_price: purchase_price,
+                selling_price: selling_price
+            };
 
-        fetch('/api/books/addBookCopy', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(bookCopyData)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Failed to add book copy');
-            }
-        })
-	// store message in localStorage for search.html
-            .then(data => {
-            localStorage.setItem('message', 'success');
-            localStorage.setItem('details', 'Book copy added successfully!');
+            fetch('/api/books/addBookCopy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookCopyData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to add book copy');
+                }
+            })
+                // store message in localStorage for search.html
+                .then(data => {
+                localStorage.setItem('message', 'success');
+                localStorage.setItem('details', 'Teoskappale lisätty onnistuneesti!');
 
-            if (storeId == 1) {
-                window.location.href = "keskusdivari.html";
-            } else if (storeId == 2) {
+                if (storeId == 1) {
+                    window.location.href = "keskusdivari.html";
+                } else if (storeId == 2) {
+                    window.location.href = "divari.html";
+                } else {
+                    alert("Store ID not found.");
+                }
+            })
+            .catch(error => {
+                console.error('Error adding book copy:', error);
+                localStorage.setItem('message', 'failure');
+                localStorage.setItem('details', 'Teoskappaleen lisääminen epäonnistui. Yritän uudelleen.');
                 window.location.href = "divari.html";
-            } else {
-                alert("Store ID not found.");
-            }
-        })
-        .catch(error => {
-            console.error('Error adding book copy:', error);
-            localStorage.setItem('message', 'failure');
-            localStorage.setItem('details', 'Failed to add book copy. Please try again.');
-            window.location.href = "divari.html";
+            });
         });
-    });
-}
-    </script>
+    }
+</script>
 </body>
 </html>

@@ -30,19 +30,53 @@
             color: white;
             cursor: pointer; 
         }
+   button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+	height: 40px; 
+        width: 120px; 
+	text-align: left;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    button:disabled {
+        background-color: #d3d3d3; 
+        color: #808080; 
+        cursor: not-allowed;
+    }
+    input[type="text"], select {
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+
     </style>
 </head>
 <body>
-    <p>Rooli: Keskusdivari</p>
-    <button onclick="window.location.href='index.html'">Vaihda Rooli</button>
-    <form id="addForm">
-	<p>Lisää teos myyntiin, anna ISBN-tunnus</p>
-        <label for="isbn">ISBN: </label>
-        <input type="text" id="isbn" name="isbn">
-        <button type="submit">Lisää teos</button>
-    </form>
+    <div style="display: flex; gap: 10px; justify-content: left; margin-bottom: 30px">
+        <p>Rooli: Keskusdivari</p>
+        <button style="margin-left: 40px" onclick="window.location.href='index.html'">Vaihda Rooli</button>
+    </div>
+    <div style = "background-color: #FFFFFF; padding: 10px; border-radius:10px;">
+        <form style = "margin-bottom: 30px" id="addForm">
+        <h3>Lisää teos myyntiin, anna ISBN-tunnus</h3>
+            <label for="isbn">ISBN: </label>
+            <input style="margin-left:10px;" type="text" id="isbn" name="isbn" oninput="validateISBN()">
+            <button id="submitButton" style="margin-left: 40px" type="submit" disabled>Lisää teos</button>
+            <p>Annetun ISBN-tunnuksen tulee olla 13 numeroa pitkä</p>
+        </form>
+    </div>
 
-    <h3>Tuota raportti R2: Teosten kokonaismyyntihinta ja keskihinta luokan mukaan</h3>
+    <h3 style = "margin-top: 40px">Tuota raportti R2: Teosten kokonaismyyntihinta ja keskihinta luokan mukaan</h3>
     <button onClick="toggleR2Table()">Tuota R2</button>
 
     <table id="R2Table" style="display:none;">
@@ -59,39 +93,39 @@
         </tbody>
     </table>
 
-    <h3>Tuota raportti R3: Asiakkaiden viime vuonna tehtyjen tilausten lukumäärät</h3>
+    <h3 style = "margin-top: 40px">Tuota raportti R3: Asiakkaiden viime vuonna tehtyjen tilausten lukumäärät</h3>
     <button id="r3Btn">Lataa R3</button>
 
-    <script>
+<script>
 
-document.addEventListener("DOMContentLoaded", function () {
-    const message = localStorage.getItem('message');
-    const details = localStorage.getItem('details');
+    document.addEventListener("DOMContentLoaded", function () {
+        const message = localStorage.getItem('message');
+        const details = localStorage.getItem('details');
 
-    if (message) {
-        const messageDiv = document.createElement('div');
-        messageDiv.style.padding = '10px';
-        messageDiv.style.marginBottom = '20px';
-        messageDiv.style.border = '1px solid';
-        messageDiv.style.borderRadius = '5px';
+        if (message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.padding = '10px';
+            messageDiv.style.marginBottom = '20px';
+            messageDiv.style.border = '1px solid';
+            messageDiv.style.borderRadius = '5px';
 
-        if (message === 'success') {
-            messageDiv.style.backgroundColor = '#d4edda';
-            messageDiv.style.color = '#155724';
-            messageDiv.style.borderColor = '#c3e6cb';
-        } else if (message === 'failure') {
-            messageDiv.style.backgroundColor = '#f8d7da';
-            messageDiv.style.color = '#721c24';
-            messageDiv.style.borderColor = '#f5c6cb';
+            if (message === 'success') {
+                messageDiv.style.backgroundColor = '#d4edda';
+                messageDiv.style.color = '#155724';
+                messageDiv.style.borderColor = '#c3e6cb';
+            } else if (message === 'failure') {
+                messageDiv.style.backgroundColor = '#f8d7da';
+                messageDiv.style.color = '#721c24';
+                messageDiv.style.borderColor = '#f5c6cb';
+            }
+
+            messageDiv.textContent = details || (message === 'success' ? 'Operation successful!' : 'Operation failed.');
+            document.body.insertBefore(messageDiv, document.body.firstChild);
+
+            localStorage.removeItem('message');
+            localStorage.removeItem('details');
         }
-
-        messageDiv.textContent = details || (message === 'success' ? 'Operation successful!' : 'Operation failed.');
-        document.body.insertBefore(messageDiv, document.body.firstChild);
-
-        localStorage.removeItem('message');
-        localStorage.removeItem('details');
-    }
-});
+    });
 
     // Fetch R2 data and upload table for it
     let isDataLoaded = false;
@@ -182,6 +216,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    </script>
+    function validateISBN() {
+        const isbnInput = document.getElementById("isbn");
+        const submitButton = document.getElementById("submitButton");
+
+        const isbnRegex = /^\d{13}$/;
+        if (isbnRegex.test(isbnInput.value)) {
+            submitButton.disabled = false; 
+        } else {
+            submitButton.disabled = true; 
+        }
+    }
+
+</script>
 </body>
 </html>

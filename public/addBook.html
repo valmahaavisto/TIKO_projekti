@@ -5,69 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Book</title>
     <style>
-        /* Add some basic styles */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+	    background-color: #f4f4f4;
+	    padding: 20px;
         }
         label {
-            display: block;
-            margin-top: 10px;
+            width: 150px;
+            font-weight: bold;
         }
-        input {
+        .form-group {
+            display: flex;
+            align-items: center;
             margin-bottom: 10px;
-            padding: 5px;
-            width: 100%;
         }
-        button {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
+	button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+	height: 40px; 
+        width: 120px; 
+	text-align: left;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    button:disabled {
+        background-color: #d3d3d3; 
+        color: #808080; 
+        cursor: not-allowed;
+    }
+    input, select { 
+        padding: 8px;
+	width: 50%;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
     </style>
 </head>
 <body>
-    <p>Rooli: rooli</p>
-    <button onclick="window.location.href='divari.html'">Paluu</button>
-    <form id="addBookForm">
+<div style="display: flex; gap: 10px; justify-content: left; margin-bottom: 30px">
+    <p id="role">Rooli: </p>
+    <button style="margin-left: 40px" onclick="window.location.href='divari.html'">Paluu</button>
+</div>
+    <form id="addBookForm" style = "background-color: #FFFFFF; padding: 20px; border-radius:10px;">
         <p>Teos puuttuu tietokannasta, täytä teostiedot</p>
-        <label for="teos_nimi">Teoksen nimi: </label>
-        <input type="text" id="teos_nimi" name="teos_nimi" required>
 
-        <label for="teos_vuosi">Julkaisuvuosi: </label>
-        <input type="number" id="teos_vuosi" name="teos_vuosi" required>
+        <div class="form-group">
+            <label for="teos_nimi">Teoksen nimi: </label>
+            <input type="text" id="teos_nimi" name="teos_nimi" required>
+        </div>
 
-        <label for="tekija_nimi">Tekijän nimi: </label>
-        <input type="text" id="tekija_nimi" name="tekija_nimi" required>
+        <div class="form-group">
+            <label for="teos_vuosi">Julkaisuvuosi: </label>
+            <input type="number" id="teos_vuosi" name="teos_vuosi" required>
+        </div>
 
-        <label for="tyyppi">Tyyppi: </label>
-        <select id="tyyppi" name="tyyppi" required>
-            <option value="history">Historia</option>
-            <option value="detective">Dekkari</option>
-            <option value="humor">Huumori</option>
-	    <option value="guide">Opas</option>
-        </select>
+        <div class="form-group">
+            <label for="tekija_nimi">Tekijän nimi: </label>
+            <input type="text" id="tekija_nimi" name="tekija_nimi" required>
+        </div>
 
-        <label for="luokka">Luokka: </label>
-        <select id="luokka" name="luokka" required>
-            <option value="comic">Komiikka</option>
-            <option value="non-fiction">Tietokirjallisuus</option>
-        </select>
+        <div class="form-group">
+            <label for="tyyppi">Tyyppi: </label>
+            <select id="tyyppi" name="tyyppi" required>
+                <option value="history">Historia</option>
+                <option value="detective">Dekkari</option>
+                <option value="humor">Huumori</option>
+                <option value="guide">Opas</option>
+            </select>
+        </div>
 
-        <label for="paino">Paino: </label>
-        <input type="number" id="paino" name="paino" required>
+        <div class="form-group">
+            <label for="luokka">Luokka: </label>
+            <select id="luokka" name="luokka" required>
+                <option value="comic">Komiikka</option>
+                <option value="non-fiction">Tietokirjallisuus</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="paino">Paino: </label>
+            <input type="number" id="paino" name="paino" required>
+        </div>
 
         <button type="submit">Jatka</button>
     </form>
 
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const store_id = urlParams.get('store_id');
+
+        const roleElement = document.getElementById("role");
+        if (store_id === "1") {
+            roleElement.textContent = "Rooli: Keskusdivari";
+        } else if (store_id === "2") {
+            roleElement.textContent = "Rooli: Divari";
+        } else {
+            roleElement.textContent = "Rooli: Tuntematon"; 
+        }
+
         document.getElementById("addBookForm").addEventListener("submit", function (event) {
-            event.preventDefault();  // Prevent the default form submission behavior
+            event.preventDefault();  
 
             const teos_nimi = document.getElementById("teos_nimi").value;
             const teos_vuosi = document.getElementById("teos_vuosi").value;
@@ -78,7 +125,7 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const isbn = urlParams.get('isbn');
-			const store_id = urlParams.get('store_id');
+            const store_id = urlParams.get('store_id');
 
             const bookData = {
                 isbn: isbn,
@@ -90,7 +137,6 @@
                 paino: paino
             };
 
-            // Gather the given book info to localStorage so addBookCopy can find it to add a book
             localStorage.setItem('bookData', JSON.stringify({
                 isbn: isbn,
                 nimi: teos_nimi,
@@ -102,8 +148,7 @@
             }));
 
             window.location.href = `addBookCopy.html?book_id=undefined&store_id=${store_id}&bookToBeAdded=true`;            
-
-	});
+        });
     </script>
 </body>
 </html>
