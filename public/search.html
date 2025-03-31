@@ -55,7 +55,7 @@
     <div style="display: flex; gap: 10px; justify-content: left; margin-bottom: 30px">
         <p>Rooli: Asiakas</p>
         <button style="margin-left: 40px" onclick="window.location.href='index.html'">Vaihda Rooli</button>
-        <button style="margin-left:auto">Tarkastele ostoskoria</button>
+        <button style="margin-left:auto" onclick="window.location.href='shoppingCart.html'">Tarkastele ostoskoria</button>
     </div>
     <div style="display: flex; gap: 20px;">
         <div style="flex: 2;">
@@ -124,6 +124,7 @@
                         <th>Status</th>
                         <th>Sisäänostohinta</th>
                         <th>Myyntihinta</th>
+			<th>Lisää</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -233,7 +234,7 @@
                 const bookCopiesTable = document.getElementById("bookCopiesTable");
                 const tableBody = bookCopiesTable.querySelector("tbody");
 
-                tableBody.innerHTML = ""; // Clear previous rows
+                tableBody.innerHTML = ""; 
 
                 const noCopies = data.every(copy => copy.copy_id === null);
 
@@ -249,11 +250,11 @@
                             ? "ostettu"
                             : "N/A";
 
-			const storeText = copy.store_id === 1
-			    ? "Keskusdivari"
-			    : copy.store_id === 2
-			    ? "Divari"
-			    : "N/A";
+                        const storeText = copy.store_id === 1
+                            ? "Keskusdivari"
+                            : copy.store_id === 2
+                            ? "Divari"
+                            : "N/A";
 
                         const row = document.createElement("tr");
                         row.innerHTML = `
@@ -262,6 +263,9 @@
                             <td>${statusText}</td>
                             <td>${copy.purchase_price || "N/A"}</td>
                             <td>${copy.selling_price || "N/A"}</td>
+                            <td>
+                                <button class="add-button" onclick="addToOrder(1, ${copy.copy_id}, null)">+</button>
+                            </td>
                         `;
                         tableBody.appendChild(row);
                     });
@@ -271,6 +275,50 @@
             })
             .catch(error => console.error("Error fetching book copies:", error));
     }
+
+    /*
+    function addToOrder(customerId = 1, copy_id, order_id = null) {
+         if (!order_id) {
+            // If it doesn't exist, create an order first (createOrder returns the new order_id)
+            fetch(`api/orders/createOrder`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ customer_id: customerId }), // Send customer_id in the request body
+            })
+                .then(response => {
+                    console.log("Create Order Response:", response); // Log the raw response
+                    return response.json(); // Parse the response as JSON
+                })
+                .then(data => {
+                    console.log("Create Order Data:", data); // Log the parsed response data
+                    const newOrderId = data.order_id; // Get the newly created order_id
+                    console.log(`Created new order with ID: ${newOrderId}`);
+                    // Add the book copy to the newly created order
+                    addBookCopyToOrder(newOrderId, copy_id);
+                })
+                .catch(error => console.error("Error creating order:", error));
+        } else {
+            // If an order already exists, add the book copy to it
+            addBookCopyToOrder(order_id, copy_id);
+        }
+    }
+
+    // Helper function to add a book copy to an order
+    function addBookCopyToOrder(order_id, copy_id) {
+        fetch(`api/orders/addToOrder?order_id=${order_id}&copy_id=${copy_id}`, {
+            method: "POST",
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log(`Book copy ${copy_id} added to order ${order_id}`);
+                } else {
+                    console.error(`Failed to add book copy ${copy_id} to order ${order_id}`);
+                }
+            })
+            .catch(error => console.error("Error adding book copy to order:", error));
+    }*/
 
     function closeBookCopies() {
         const bookCopiesContainer = document.getElementById("bookCopiesContainer");
