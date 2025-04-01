@@ -12,7 +12,12 @@ app.use('/api', bookRoutes);
 const customerRoutes = require('./src/api/customerRoutes');
 app.use('/api', customerRoutes);
 
+const orderRoutes = require('./src/api/orderRoutes');
+app.use('/api', orderRoutes);
+
+
 app.get('/', (req, res) => {
+  //res.send('Hello from Node.js server!');
   res.sendFile(__dirname + '/public/index.html');
 });
 
@@ -32,7 +37,7 @@ app.get('/api/books', (req, res) => {
 // migrations
 createDefaultTables()
   .then(() => {
-    const PORT = process.env.PORT || 8080;
+    const PORT = 8080;
     app.listen(PORT, () => {
       console.log(`Server running on http://tie-tkannat.it.tuni.fi:${PORT}`);
     });

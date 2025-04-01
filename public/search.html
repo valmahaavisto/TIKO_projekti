@@ -256,6 +256,8 @@
                             ? "Divari"
                             : "N/A";
 
+                        const isDisabled = copy.status !== 0 ? "disabled" : ""; // Disable button if status is not 0
+
                         const row = document.createElement("tr");
                         row.innerHTML = `
                             <td>${copy.copy_id || "N/A"}</td>
@@ -264,51 +266,54 @@
                             <td>${copy.purchase_price || "N/A"}</td>
                             <td>${copy.selling_price || "N/A"}</td>
                             <td>
-                                <button class="add-button" onclick="addToOrder(1, ${copy.copy_id}, null)">+</button>
+                                <button class="add-button" onclick="addToOrder(1, ${copy.copy_id}, null)" ${isDisabled}>+</button>
                             </td>
                         `;
                         tableBody.appendChild(row);
                     });
                 }
 
-                bookCopiesContainer.style.display = "block"; // Show the container
+                bookCopiesContainer.style.display = "block"; 
             })
             .catch(error => console.error("Error fetching book copies:", error));
     }
 
-    /*
     function addToOrder(customerId = 1, copy_id, order_id = null) {
-         if (!order_id) {
-            // If it doesn't exist, create an order first (createOrder returns the new order_id)
-            fetch(`api/orders/createOrder`, {
+        if (!order_id) {
+            fetch(`/api/orders/createOrder`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ customer_id: customerId }), // Send customer_id in the request body
+                body: JSON.stringify({ customer_id: customerId }),
             })
-                .then(response => {
-                    console.log("Create Order Response:", response); // Log the raw response
-                    return response.json(); // Parse the response as JSON
-                })
-                .then(data => {
-                    console.log("Create Order Data:", data); // Log the parsed response data
-                    const newOrderId = data.order_id; // Get the newly created order_id
-                    console.log(`Created new order with ID: ${newOrderId}`);
-                    // Add the book copy to the newly created order
-                    addBookCopyToOrder(newOrderId, copy_id);
-                })
-                .catch(error => console.error("Error creating order:", error));
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                addBookCopyToOrder(data, copy_id);
+            })
+            .catch(error => console.error("Error creating order:", error));
+
         } else {
-            // If an order already exists, add the book copy to it
             addBookCopyToOrder(order_id, copy_id);
         }
     }
 
     // Helper function to add a book copy to an order
     function addBookCopyToOrder(order_id, copy_id) {
-        fetch(`api/orders/addToOrder?order_id=${order_id}&copy_id=${copy_id}`, {
+        console.log(order_id);
+        console.log(copy_id);
+        fetch(`api/orders/addToOrder`, {
             method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ order_id: order_id, copy_id: copy_id }),
+
         })
             .then(response => {
                 if (response.ok) {
@@ -318,7 +323,7 @@
                 }
             })
             .catch(error => console.error("Error adding book copy to order:", error));
-    }*/
+    }
 
     function closeBookCopies() {
         const bookCopiesContainer = document.getElementById("bookCopiesContainer");
