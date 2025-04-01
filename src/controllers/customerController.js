@@ -23,23 +23,6 @@ const getR3 = async (req, res) => {
 };
 
 
-const getCustomerByEmail = async (req, res) => {
-    console.log(`Received GET request: /api/customers/${req.params.email}`);
-    try {
-        const customer = await Customer.getCustomerByEmail(req.params.email);
-        if (!customer) {
-            console.log('Customer not found by email ${req.params.email}.');
-            return res.status(404).json({ error: 'Customer not found' });
-        }
-        console.log('Sending the data to client:', customer);
-        res.json(customer);
-    } catch (error) {
-         console.log('Error fetching customer by email:', error);
-         res.status(500).json({error: 'Internal Server Error'});   
-    }
-};
-
-
 const getCustomerLogin = async (req, res) => { 
     const { email, password } = req.body;
     if (!email || !password) {
@@ -99,4 +82,4 @@ const getCustomers = async (req, res) => {
   } 
 };
 
-module.exports = { getR3, getCustomerByEmail, getCustomerLogin, registerCustomer, getCustomers };
+module.exports = { getR3, getCustomerLogin, registerCustomer, getCustomers };

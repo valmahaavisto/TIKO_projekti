@@ -54,10 +54,12 @@
             body: JSON.stringify({ email, password })
         });
 
+        // Receives the whole row of a particular customer
         const data = await response.json();
 
         // Redirects to customer book search page after successful login
         if (response.ok) {
+            sessionStorage.setItem("customer_id", data.customer_id);
             window.location.href = "/search.html";
         } else {
             document.getElementById("errorMessage").style.display = "block";
