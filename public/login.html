@@ -59,7 +59,9 @@
 
         // Redirects to customer book search page after successful login
         if (response.ok) {
-            sessionStorage.setItem("customer_id", data.customer_id);
+            console.log(data);
+            localStorage.setItem("customer_id", data.customer.customer_id);
+            console.log(localStorage.getItem("customer_id"));
             window.location.href = "/search.html";
         } else {
             document.getElementById("errorMessage").style.display = "block";
