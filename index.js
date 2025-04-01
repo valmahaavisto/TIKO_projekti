@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('./src/config/db'); 
-const createDefaultTables = require('./src/migrations/createDefaultTables'); 
+const createDefaultTables = require('./src/migrations/createDefaultTables');
+const insertTestData = require('./src/migrations/insertTestData'); 
 
 const app = express();
 app.use(express.json());
@@ -17,7 +18,6 @@ app.use('/api', orderRoutes);
 
 
 app.get('/', (req, res) => {
-  //res.send('Hello from Node.js server!');
   res.sendFile(__dirname + '/public/index.html');
 });
 
@@ -36,6 +36,7 @@ app.get('/api/books', (req, res) => {
 
 // migrations
 createDefaultTables()
+  .then(() => insertTestData())
   .then(() => {
     const PORT = 8080;
     app.listen(PORT, () => {
