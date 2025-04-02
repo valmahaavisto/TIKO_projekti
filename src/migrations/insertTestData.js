@@ -32,7 +32,7 @@ const insertTestData = async () => {
         
         INSERT INTO Book (isbn, title, author, publication_year, weight, type_id, category_id)
         VALUES
-        ('9155430674', 'Elektran tyt r', 'Madeleine Brent', 1986, 0.5, 
+        ('9155430674', 'Elektran tytär', 'Madeleine Brent', 1986, 0.5, 
             (SELECT type_id FROM Type WHERE type_name = 'romance'),
             (SELECT category_id FROM Category WHERE category_name = 'novel')
         ),
@@ -48,11 +48,11 @@ const insertTestData = async () => {
             (SELECT type_id FROM Type WHERE type_name = 'detective'),
             (SELECT category_id FROM Category WHERE category_name = 'novel')
         ),
-        ('1989', 'Friikkil n pojat Mexicossa', 'Shelton Gilbert', 1989, 0.5, 
+        ('1989', 'Friikkilän pojat Mexicossa', 'Shelton Gilbert', 1989, 0.5, 
             (SELECT type_id FROM Type WHERE type_name = 'humor'),
             (SELECT category_id FROM Category WHERE category_name = 'comic')
         ),
-        ('9789510396230', 'Miten saan yst vi , menestyst , vaikutusvaltaa', 'Dale Carnegie', 1939, 0.5, 
+        ('9789510396230', 'Miten saan ystäviä , menestystä , vaikutusvaltaa', 'Dale Carnegie', 1939, 0.5, 
             (SELECT type_id FROM Type WHERE type_name = 'guide'),
             (SELECT category_id FROM Category WHERE category_name = 'non-fiction')
         )

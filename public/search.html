@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,6 +42,11 @@
         button:hover {
             background-color: #0056b3;
         }
+        button:disabled {
+            background-color: #d3d3d3; 
+            color: #808080; 
+            cursor: not-allowed;
+        }
         input[type="text"], select {
             width: 50%; 
             padding: 8px;
@@ -55,7 +61,7 @@
     <div style="display: flex; gap: 10px; justify-content: left; margin-bottom: 30px">
         <p>Rooli: Asiakas</p>
         <button style="margin-left: 40px" onclick="window.location.href='index.html'">Vaihda Rooli</button>
-        <button style="margin-left:auto" onclick="window.location.href='shoppingCart.html'">Tarkastele ostoskoria</button>
+        <button style="margin-left:auto" onclick="window.location.href='shoppingCart.html'">Tarkastele ostoskoria ( <span id="cartCounter">0</span> )</button>
     </div>
     <div style="display: flex; gap: 20px;">
         <div style="flex: 2;">
@@ -169,6 +175,12 @@
         rows.forEach(row => tbody.appendChild(row));
     }
 
+    function updateCartCounter() {
+        const cartCount = JSON.parse(localStorage.getItem("cart")) || 0;
+        const counter = document.getElementById("cartCounter");
+        counter.textContent = cartCount;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         fetchBooks(); 
 
@@ -176,6 +188,12 @@
             event.preventDefault();
             fetchFilteredBooks();
         });
+
+        updateCartCounter();
+    });
+
+    window.addEventListener("beforeunload", function () {
+        localStorage.setItem("cart", 0); 
     });
 
     function fetchBooks() {
@@ -206,10 +224,14 @@
         if (Array.isArray(data)) {
             data.forEach(book => {
                 const row = document.createElement("tr");
-            row.setAttribute("data-book-id", book.book_id)
-            console.log(book.book_id);
+            	row.setAttribute("data-book-id", book.book_id)
+		
+		const isbn = book.isbn === String(book.publication_year)
+			   ? "-"
+			   : book.isbn; 
+
                 row.innerHTML = `
-                    <td>${book.isbn}</td>
+                    <td>${isbn}</td>
                     <td>${book.title}</td>
                     <td>${book.author}</td>
                     <td>${book.publication_year}</td>
@@ -256,7 +278,8 @@
                             ? "Divari"
                             : "N/A";
 
-                        const isDisabled = copy.status !== 0 ? "disabled" : ""; // Disable button if status is not 0
+                        const isDisabled = copy.status !== 0 ? "disabled" : ""; 
+			            const customer_id = localStorage.getItem("customer_id");				
 
                         const row = document.createElement("tr");
                         row.innerHTML = `
@@ -266,7 +289,7 @@
                             <td>${copy.purchase_price || "N/A"}</td>
                             <td>${copy.selling_price || "N/A"}</td>
                             <td>
-                                <button class="add-button" onclick="addToOrder(1, ${copy.copy_id}, null)" ${isDisabled}>+</button>
+                                <button class="add-button" onclick="addToOrder(this, ${customer_id}, ${copy.copy_id}, null)" ${isDisabled}>+</button>
                             </td>
                         `;
                         tableBody.appendChild(row);
@@ -278,7 +301,25 @@
             .catch(error => console.error("Error fetching book copies:", error));
     }
 
-    function addToOrder(customerId = 1, copy_id, order_id = null) {
+    function addToOrder(button, customerId = null, copy_id, order_id = null) {
+        if (!customerId) {
+            alert("Customer ID not provided. Log in first!");
+            return;
+        }
+
+        const cartCount = parseInt(localStorage.getItem("cart")) || 0;
+        localStorage.setItem("cart", cartCount + 1);
+
+        updateCartCounter();
+
+        // update add button and status field before adding
+        button.disabled = true;
+        const row = button.closest("tr");
+        const statusCell = row.querySelector("td:nth-child(3)"); 
+        if (statusCell) {
+            statusCell.textContent = "varattu"; 
+        }
+
         if (!order_id) {
             fetch(`/api/orders/createOrder`, {
                 method: "POST",
@@ -287,47 +328,50 @@
                 },
                 body: JSON.stringify({ customer_id: customerId }),
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                addBookCopyToOrder(data, copy_id);
-            })
-            .catch(error => console.error("Error creating order:", error));
-
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(order_id => {
+                    addBookCopyToOrder(button, order_id, copy_id);
+                })
+                .catch(error => {
+                    console.error("Error creating order:", error);
+                    button.disabled = false;
+                });
         } else {
-            addBookCopyToOrder(order_id, copy_id);
+            addBookCopyToOrder(button, order_id, copy_id);
         }
     }
 
     // Helper function to add a book copy to an order
-    function addBookCopyToOrder(order_id, copy_id) {
-        console.log(order_id);
-        console.log(copy_id);
+    function addBookCopyToOrder(button, order_id, copy_id) {
         fetch(`api/orders/addToOrder`, {
             method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ order_id: order_id, copy_id: copy_id }),
-
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ order_id: order_id, copy_id: copy_id }),
         })
             .then(response => {
                 if (response.ok) {
                     console.log(`Book copy ${copy_id} added to order ${order_id}`);
                 } else {
                     console.error(`Failed to add book copy ${copy_id} to order ${order_id}`);
+                     button.disabled = false;
                 }
             })
-            .catch(error => console.error("Error adding book copy to order:", error));
-    }
+            .catch(error => {
+                console.error("Error adding book copy to order:", error);
+                button.disabled = false;
+            });
+    }   
 
     function closeBookCopies() {
         const bookCopiesContainer = document.getElementById("bookCopiesContainer");
-        bookCopiesContainer.style.display = "none"; // Hide the container
+        bookCopiesContainer.style.display = "none"; 
     }
 
 </script>
