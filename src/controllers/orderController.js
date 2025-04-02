@@ -36,7 +36,6 @@ const getOrderById = async (req, res) => {
 	}
 };
 
-// creates the order but check the return value
 const createOrder = async (req,res) => {
 	const { customer_id } = req.query;
 	if (!customer_id) {
@@ -54,6 +53,24 @@ const createOrder = async (req,res) => {
    		res.status(500).json({ error: "Internal Server Error" });
   	}
 };
+
+const deleteOrder = async(req,res) => {
+	const {order_id} = req.query;
+	if(!order_id) {
+		return res.status(400).json({error: "Order id is required."});
+	}
+	try {
+		const result = await Order.deleteOrder(order_id);
+		if(result) {
+			res.status(200).json({ message: `Order ${order_id} has been deleted.` });
+		} else {
+			res.status(404).json({ error: "Failed to delete order." });
+		}
+	} catch(error) {
+		console.error("Error deleting order:", error.message);
+		res.status(500).json({ error: "Internal server Error"});
+	}
+}
 
 const getOrderId = async(req, res) => {
 	const {customer_id} = req.query;
@@ -97,7 +114,6 @@ const countShippingCosts = async (req, res) => {
 const addToOrder = async (req, res) => {
   const { order_id, copy_id } = req.body;
   if (!order_id || !copy_id) {
-	console.log("Order ID or Copy ID is missing"); // for testing
     return res.status(400).json({ error: "Order id and copy id are required." });
   }
   try {
@@ -152,4 +168,4 @@ const shipOrder = async (req, res) => {
 };
 
 
-module.exports = {getAllOrders, getOrderById, createOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder};
+module.exports = {getAllOrders, getOrderById, createOrder, deleteOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder};

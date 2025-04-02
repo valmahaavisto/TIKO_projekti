@@ -8,13 +8,18 @@ router.get('/orders', (req, res) => {
 }); 
 
 router.get('/orders/getOrderById', (req, res) => {
-	console.log('Incoming request. GET /api/orders/getOrderById');
+	console.log('Incoming request: GET /api/orders/getOrderById');
 	orderController.getOrderById(req, res);
 });
 
 router.post('/orders/createOrder', (req,res) => {
-	console.log('Incoming request. POST /api/orders/createOrder');
+	console.log('Incoming request: POST /api/orders/createOrder');
 	orderController.createOrder(req,res);
+});
+
+router.post('/orders/deleteOrder', (req,res) => {
+	console.log('Incoming request: POST /api/orders/deleteOrder');
+	orderController.deleteOrder(req,res);
 });
 
 router.get('/orders/getOrderId', (req,res) => {
@@ -23,7 +28,7 @@ router.get('/orders/getOrderId', (req,res) => {
 });
 
 router.get('/orders/countShippingCosts', (req, res) => {
-	console.log('Incoming request. GET /api/orders/countShippingCosts');
+	console.log('Incoming request: GET /api/orders/countShippingCosts');
 	orderController.countShippingCosts(req,res); 
 });
 

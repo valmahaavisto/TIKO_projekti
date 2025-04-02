@@ -62,11 +62,32 @@ const createOrder = async (customer_id) => {
     }
 };
 
+const deleteOrder = async (order_id) => {
+	try {
+		const order_check = await pool.query('SELECT * FROM BookOrder WHERE order_id = $1', [order_id]);
+		if (order_check.rows.length === 0) {
+			console.log(`Order ${order_id} does not have an order.`);
+			return false;
+		}
+		const status = order_check.rows[0].status;
+		if (status === 1) {
+			console.log(`Order ${order_id} has been shipped.`);
+			return false;
+		}
+		await pool.query('DELETE FROM BookOrder WHERE order_id=$1', [order_id]);
+		console.log(`Order ${order_id} has been deleted.`);
+		return true;
+	} catch (error) {
+		console.log('Error deleting order:', error);
+		throw error;
+	}
+ }
+
 const getOrderId = async(customer_id) => {
 	try {
-		const order_check = await pool.query('SELECT * FROM BookOrder WHERE customer_id = $1', [customer_id]);
+		const order_check = await pool.query('SELECT * FROM BookOrder WHERE customer_id = $1 ORDER BY order_id DESC', [customer_id]);
     	if (order_check.rows.length === 0) {
-			console.log(`Customer ${customer_id} has never created and order. New order created.`);
+			console.log(`Customer ${customer_id} does not have an order. New order created.`);
 			const order_id = createOrder(customer_id);
 			return order_id;
 		}
@@ -133,10 +154,10 @@ const addToOrder = async (order_id, copy_id) => {
         const status = copy_check.rows[0].status;
 		if (status === 0) {
             const book_id = copy_check.rows[0].book_id;
-            // const weight = await Book.getBookWeightById(book_id);
-			const weight = 0.25; // for testing
+            const weight = await Book.getBookWeightById(book_id);
+			// const weight = 0.25; // for testing
             await pool.query('UPDATE BookOrder SET total_weight = total_weight + $1 WHERE order_id = $2', [weight, order_id]);
-            await pool.query('UPDATE BookCopy SET status = 1, order_id = $1 WHERE copy_id =$2', [order_id, copy_id]);
+            await pool.query('UPDATE BookCopy SET status = 1, order_id = $1, timestamp = CURRENT_TIMESTAMP WHERE copy_id =$2', [order_id, copy_id]);
             console.log(`Book copy ${copy_id} added to order ${order_id}.`);
 			return true;
         } else {
@@ -160,11 +181,18 @@ const removeFromOrder = async (copy_id) => {
         const order_id = copy_check.rows[0].order_id;
         if (status === 1 && order_id !== null) {
             const book_id = copy_check.rows[0].book_id;
-            // const weight = await Book.getBookWeightById(book_id);
-			const weight = 0.25; // for testing
+            const weight = await Book.getBookWeightById(book_id);
+			// const weight = 0.25; // for testing
             await pool.query ('UPDATE BookOrder SET total_weight = total_weight - $1 WHERE order_id = $2', [weight, order_id]);
-            await pool.query('UPDATE BookCopy SET status = 0, order_id = NULL WHERE copy_id = $1', [copy_id]);
+            await pool.query('UPDATE BookCopy SET status = 0, order_id = NULL, timestamp = NULL WHERE copy_id = $1', [copy_id]);
             console.log(`Book copy ${copy_id} removed from the order ${order_id}.`);
+
+			const empty_check = ('SELECT * FROM bookCopy WHERE order_id = $1', [order_id]);
+			if (empty_check.rows.length === 0){
+				console.log(`Book copy ${copy_id} was only element in order ${order_id}, so order is now to be deleted.`);
+				const deleted = deleteOrder(order_id);
+				return deleted;
+			}
             return true;
         } else {
             console.log('The book copy is not in order.');
@@ -193,7 +221,7 @@ const shipOrder = async (order_id) => {
 		if(!status) {
 			await pool.query ('UPDATE BookOrder SET status = 1 WHERE order_id = $1', [order_id]);
 			const copyIds = item_check.rows.map(row => row.copy_id);
-            await pool.query('UPDATE BookCopy SET status = 2 WHERE copy_id = ANY($1::int[])', [copyIds]);			console.log(`Order ${order_id} has been shipped.`);
+            await pool.query('UPDATE BookCopy SET status = 2, sale_time = CURRENT_TIMESTAMP WHERE copy_id = ANY($1::int[])', [copyIds]);			console.log(`Order ${order_id} has been shipped.`);
 			console.log(`Order ${order_id} has been shipped.`);
 			return true;
 		} else {
@@ -206,4 +234,4 @@ const shipOrder = async (order_id) => {
 	}
 };
 
-module.exports = {getOrderById, getAllOrders, createOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder}
+module.exports = {getOrderById, getAllOrders, createOrder, deleteOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder}
