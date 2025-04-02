@@ -192,10 +192,6 @@
         updateCartCounter();
     });
 
-    window.addEventListener("beforeunload", function () {
-        localStorage.setItem("cart", 0); 
-    });
-
     function fetchBooks() {
         fetch('api/books')
             .then(response => response.json())

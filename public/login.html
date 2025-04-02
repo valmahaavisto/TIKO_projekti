@@ -62,6 +62,7 @@
             console.log(data);
             localStorage.setItem("customer_id", data.customer.customer_id);
             console.log(localStorage.getItem("customer_id"));
+            localStorage.setItem("cart", 0); // set the amount of items in cart 0 before moving to search.html
             window.location.href = "/search.html";
         } else {
             document.getElementById("errorMessage").style.display = "block";
