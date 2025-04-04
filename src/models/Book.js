@@ -49,8 +49,8 @@ const getBookCopyById = async (id) => {
 
 const getBookWeightById = async (id) => {
   try {
-    const result = await pool.query("SELECT weight FROM Book WHERE id = $1", [id]);
-    return result.rows.length > 0 ? result.rows[0] : null;
+    const result = await pool.query(`SELECT weight FROM Book WHERE book_id = $1`, [id]);
+    return result.rows.length > 0 ? result.rows[0].weight : null;
   } catch (error) {
     console.error("Error fetching book weight by ID:", error);
     throw error;
