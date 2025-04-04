@@ -42,7 +42,7 @@ const createOrder = async (customer_id) => {
 		if(customer_check.rows.length > 0) { // customer found
 			await pool.query(`INSERT INTO BookOrder (customer_id, confirmation_time, status, total_weight, costs) VALUES
 				($1, DEFAULT, 0, 0.00, 0.00)`, [customer_id]);
-			const order_check = await pool.query('SELECT order_id FROM BookOrder WHERE customer_id = $1', [customer_id]);
+			const order_check = await pool.query('SELECT order_id FROM BookOrder WHERE customer_id = $1 ORDER BY order_id DESC', [customer_id]);
 			if(order_check.rows.length > 0) {
 				const order_id = order_check.rows[0].order_id;
 				console.log(`Order ${order_id} created for customer ${customer_id}.`);
