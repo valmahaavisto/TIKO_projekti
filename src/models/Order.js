@@ -4,7 +4,6 @@ const Book = require('./Book');
 const getAllOrders = async () => {
     try {
         const order_check= await pool.query('SELECT * FROM BookOrder ORDER BY order_id');
-		console.log(order_check.rows); // for tests
         if (order_check.rows.length === 0) {
             console.log('No orders found.');
             return null;
@@ -40,7 +39,7 @@ const getOrderById = async (order_id) => {
 const createOrder = async (customer_id) => {
 	try {
 		const customer_check = await pool.query('SELECT name FROM Customer WHERE customer_id = $1', [customer_id]);
-		if(customer_check.rows.length > 0) {
+		if(customer_check.rows.length > 0) { // customer found
 			await pool.query(`INSERT INTO BookOrder (customer_id, confirmation_time, status, total_weight, costs) VALUES
 				($1, DEFAULT, 0, 0.00, 0.00)`, [customer_id]);
 			const order_check = await pool.query('SELECT order_id FROM BookOrder WHERE customer_id = $1', [customer_id]);
@@ -66,7 +65,7 @@ const deleteOrder = async (order_id) => {
 	try {
 		const order_check = await pool.query('SELECT * FROM BookOrder WHERE order_id = $1', [order_id]);
 		if (order_check.rows.length === 0) {
-			console.log(`Order ${order_id} does not have an order.`);
+			console.log(`Order ${order_id} does not exist.`);
 			return false;
 		}
 		const status = order_check.rows[0].status;
@@ -88,13 +87,13 @@ const getOrderId = async(customer_id) => {
 		const order_check = await pool.query('SELECT * FROM BookOrder WHERE customer_id = $1 ORDER BY order_id DESC', [customer_id]);
     	if (order_check.rows.length === 0) {
 			console.log(`Customer ${customer_id} does not have an order. New order created.`);
-			const order_id = createOrder(customer_id);
+			const order_id = await createOrder(customer_id);
 			return order_id;
 		}
 		const status = order_check.rows[0].status;
 		if (status === 1) {
 			console.log(`Customer ${customer_id} has shipped order(s). New order created.`);
-			const order_id = createOrder(customer_id);
+			const order_id = await createOrder(customer_id);
 			return order_id;
 		}
 		const order_id = order_check.rows[0].order_id;
@@ -181,15 +180,14 @@ const removeFromOrder = async (copy_id) => {
         if (status === 1 && order_id !== null) {
             const book_id = copy_check.rows[0].book_id;
             const weight = await Book.getBookWeightById(book_id);
-			// const weight = 0.25; // for testing
             await pool.query ('UPDATE BookOrder SET total_weight = total_weight - $1 WHERE order_id = $2', [weight, order_id]);
             await pool.query('UPDATE BookCopy SET status = 0, order_id = NULL, timestamp = NULL WHERE copy_id = $1', [copy_id]);
             console.log(`Book copy ${copy_id} removed from the order ${order_id}.`);
 
-			const empty_check = ('SELECT * FROM bookCopy WHERE order_id = $1', [order_id]);
+			const empty_check = await pool.query('SELECT * FROM BookCopy WHERE order_id = $1', [order_id]);
 			if (empty_check.rows.length === 0){
 				console.log(`Book copy ${copy_id} was only element in order ${order_id}, so order is now to be deleted.`);
-				const deleted = deleteOrder(order_id);
+				const deleted = await deleteOrder(order_id);
 				return deleted;
 			}
             return true;
@@ -198,7 +196,7 @@ const removeFromOrder = async (copy_id) => {
             return false;
         }
     } catch (error) {
-        console.log('Error removing book copy from order.');
+        console.log('Error removing book copy from order:', error);
         throw error;
     }
 };
@@ -228,7 +226,7 @@ const shipOrder = async (order_id) => {
 			return false;
 		}
 	} catch (error) {
-		console.log('Error shipping order.');
+		console.log('Error shipping order:', error);
 		throw error;
 	}
 };

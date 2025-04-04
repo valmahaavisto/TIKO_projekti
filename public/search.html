@@ -275,7 +275,7 @@
                             : "N/A";
 
                         const isDisabled = copy.status !== 0 ? "disabled" : ""; 
-			            const customer_id = localStorage.getItem("customer_id");				
+			            const customer_id = localStorage.getItem("customer_id");
 
                         const row = document.createElement("tr");
                         row.innerHTML = `
@@ -317,12 +317,8 @@
         }
 
         if (!order_id) {
-            fetch(`/api/orders/createOrder`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ customer_id: customerId }),
+            fetch(`/api/orders/getOrderId?customer_id=${customerId}`, {
+                method: "GET"
             })
                 .then(response => {
                     if (!response.ok) {
@@ -344,12 +340,12 @@
 
     // Helper function to add a book copy to an order
     function addBookCopyToOrder(button, order_id, copy_id) {
-        fetch(`api/orders/addToOrder`, {
+        fetch(`/api/orders/addToOrder`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ order_id: order_id, copy_id: copy_id }),
+            body: JSON.stringify({ "order_id": order_id, "copy_id": copy_id }),
         })
             .then(response => {
                 if (response.ok) {
