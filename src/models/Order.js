@@ -1,5 +1,5 @@
 const pool = require('../config/db');
-const Book = require("../models/Book");
+const Book = require('./Book');
 
 const getAllOrders = async () => {
     try {
@@ -155,9 +155,8 @@ const addToOrder = async (order_id, copy_id) => {
 		if (status === 0) {
             const book_id = copy_check.rows[0].book_id;
             const weight = await Book.getBookWeightById(book_id);
-			// const weight = 0.25; // for testing
             await pool.query('UPDATE BookOrder SET total_weight = total_weight + $1 WHERE order_id = $2', [weight, order_id]);
-            await pool.query('UPDATE BookCopy SET status = 1, order_id = $1, timestamp = CURRENT_TIMESTAMP WHERE copy_id =$2', [order_id, copy_id]);
+            await pool.query('UPDATE BookCopy SET status = 1, order_id = $1, timestamp = (SELECT CURRENT_TIMESTAMP) WHERE copy_id =$2', [order_id, copy_id]);
             console.log(`Book copy ${copy_id} added to order ${order_id}.`);
 			return true;
         } else {
@@ -221,7 +220,7 @@ const shipOrder = async (order_id) => {
 		if(!status) {
 			await pool.query ('UPDATE BookOrder SET status = 1 WHERE order_id = $1', [order_id]);
 			const copyIds = item_check.rows.map(row => row.copy_id);
-            await pool.query('UPDATE BookCopy SET status = 2, sale_time = CURRENT_TIMESTAMP WHERE copy_id = ANY($1::int[])', [copyIds]);			console.log(`Order ${order_id} has been shipped.`);
+            await pool.query('UPDATE BookCopy SET status = 2, sale_time = (SELECT CURRENT_TIMESTAMP) WHERE copy_id = ANY($1::int[])', [copyIds]);			console.log(`Order ${order_id} has been shipped.`);
 			console.log(`Order ${order_id} has been shipped.`);
 			return true;
 		} else {
