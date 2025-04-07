@@ -7,6 +7,11 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  next();
+});
+
 const bookRoutes = require('./src/api/bookRoutes');
 app.use('/api', bookRoutes);
 
@@ -15,6 +20,9 @@ app.use('/api', customerRoutes);
 
 const orderRoutes = require('./src/api/orderRoutes');
 app.use('/api', orderRoutes);
+
+const xmlRoutes = require('./src/api/xmlRoutes');
+app.use('/api', xmlRoutes);
 
 
 app.get('/', (req, res) => {

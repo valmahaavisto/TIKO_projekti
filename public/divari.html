@@ -91,6 +91,13 @@
             </tbody>
         </table>
 
+        <form id=xmlUploadForm action="/api/upload-xml" method="POST" enctype="multipart/form-data">
+            <input type="file" id="xmlFile" name="file" accept=".xml" required />
+            <input type="submit" value="Upload XML" />
+        </form>
+        <p id="xmlUploadStatus"></p>
+          
+
 <script>
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -161,6 +168,27 @@ document.addEventListener("DOMContentLoaded", function () {
             table.style.display = "none";
         }
     };
+
+    // Prevent leaving ht epage after uploading xml file, show status message
+    document.getElementById("xmlUploadForm").addEventListener("submit", async function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        const formData = new FormData(this); // Get the form data (including the file)
+        try {
+            const response = await fetch("/api/upload-xml", {
+                method: "POST",
+                body: formData
+            });
+            if (response.ok) {
+                const statusMessage = document.getElementById("xmlUploadStatus");
+                statusMessage.textContent = "Tiedosto käsitelty onnistuneesti, teokset lisätty tietokantaan.";
+            } else {
+                statusMessage.textContent = "Virhe tiedoston käsittelyssä.";
+            }
+        } catch (error) {
+            statusMessage.textContent = "Virhe tiedoston lataamisessa.";
+            console.error(error);
+        }
+    });
 
     function validateISBN() {
         const isbnInput = document.getElementById("isbn");
