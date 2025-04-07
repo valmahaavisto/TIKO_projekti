@@ -60,7 +60,7 @@ const insertTestData = async () => {
 
 
         INSERT INTO ShippingRates (weight_limit, price) VALUES
-        (50, 2.50), (250, 5.00), (10, 10.00), (20, 15.00)
+        (0.05, 2.50), (0.25, 5.00), (1.00, 10.00), (2.00, 15.00)
         ON CONFLICT (weight_limit) DO NOTHING;
 
 
