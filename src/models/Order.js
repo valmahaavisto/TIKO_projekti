@@ -216,9 +216,19 @@ const shipOrder = async (order_id) => {
 		}
 		const status = order_check.rows[0].status;
 		if(!status) {
-			await pool.query ('UPDATE BookOrder SET status = 1 WHERE order_id = $1', [order_id]);
-			const copyIds = item_check.rows.map(row => row.copy_id);
-            await pool.query('UPDATE BookCopy SET status = 2, sale_time = (SELECT CURRENT_TIMESTAMP) WHERE copy_id = ANY($1::int[])', [copyIds]);			console.log(`Order ${order_id} has been shipped.`);
+			await pool.query ('UPDATE BookOrder SET status = 1, confirmation_time = (SELECT CURRENT_TIMESTAMP) WHERE order_id = $1', [order_id]);
+			const copy_ids = item_check.rows.map(row => row.copy_id);
+			let total_price = 0.0;
+			for (const copy of copy_ids) {
+				const price_result  = await pool.query('SELECT selling_price FROM BookCopy WHERE copy_id = $1', [copy]);
+				const price = parseFloat(price_result.rows[0].selling_price);
+				total_price += price;
+				await pool.query('UPDATE BookCopy SET status = 2, sale_time = (SELECT CURRENT_TIMESTAMP) WHERE copy_id = $1', [copy]);
+			}
+			const shipping_cost_data = await countShippingCosts(order_id);
+			const shipping_cost = parseFloat(shipping_cost_data);
+			const costs =  total_price + shipping_cost;
+			await pool.query('INSERT INTO Shipment (order_id, shipment_no, costs) VALUES ($1, 1, $2)', [order_id, costs]);
 			console.log(`Order ${order_id} has been shipped.`);
 			return true;
 		} else {
