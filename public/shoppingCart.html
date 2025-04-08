@@ -59,7 +59,7 @@
 <body>
     <div style="display: flex; gap: 10px; justify-content: left; margin-bottom: 30px">
         <p>Rooli: Asiakas</p>
-        <button style="margin-left: 40px" onclick="window.location.href='index.html'">Vaihda Rooli</button>
+        <button style="margin-left: 40px" onclick="handleRoleChange()">Vaihda Rooli</button>
         <button style="margin-left:auto" onclick="window.location.href='search.html'">Takaisin hakuun</button>
     </div>
     <h2>Ostoskorin sisältö</h2>
@@ -81,17 +81,22 @@
         <p>Toimituskulut: <span id="shipping-cost">0.00</span> &#8364</p>
         <p>Kokonaissumma: <span id="final-price">0.00</span> &#8364</p>
     </div>
-
-    <button id="order-button" type="button" onclick="shipOrder(parseInt(localStorage.getItem('orderId')))">Tilaa</button>
+    
+    <button style="margin-left: auto" id="clear-button" type="button" onclick="clearCart()">Tyhjennä Ostoskori</button>
+    <button style="margin-left: 40px" id="order-button" type="button" onclick="shipOrder(parseInt(localStorage.getItem('orderId')))">Tilaa</button>
     
     <script>
         let cart = [];
 
-        async function toggleOrderButton(enabled) {
-            const button = document.getElementById("order-button");
-            button.disabled = !enabled;
+        // enable or disable buttons based on if car has items
+        async function toggleButtons(enabled) {
+            const orderButton = document.getElementById("order-button");
+            const clearButton = document.getElementById("clear-button");
+            orderButton.disabled = !enabled;
+            clearButton.disabled = !enabled;
         }
 
+        // fetch order id from backend
         async function fetchOrderId(customerId) {
             fetch(`/api/orders/getOrderId?customer_id=${customerId}`)
             .then(response => response.json())
@@ -102,6 +107,7 @@
             .catch(error => console.error("Error fetching order id:", error));
         }
 
+        // fetch order items from backend
         async function fetchOrder() {
             const orderId = parseInt(localStorage.getItem("orderId"));
             fetch(`/api/orders/getOrderById?order_id=${orderId}`)
@@ -110,22 +116,22 @@
             .catch(error => console.error("Error fetching order by id:", error));
         }
 
+        // fetch shipping costs from backend
         async function fetchShippingCosts() {
             try {
                 const orderId = parseInt(localStorage.getItem("orderId"));
                 const response = await fetch(`/api/orders/countShippingCosts?order_id=${orderId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch shipping costs');
-                }
+                if (!response.ok) throw new Error("Failed to fetch shipping costs");
                 const shippingCostData = await response.json();
                 const shippingCost = parseFloat(shippingCostData);
                 return shippingCost;
             } catch (error) {
-                console.error('Error fetching shipping costs:', error);
+                console.error("Error fetching shipping costs:", error);
                 return 0;
             }
         }
 
+        // update cart items in the UI
         async function updateCartItems(data) {
             const cartBody = document.getElementById("cart-body");
             cartBody.innerHTML = "";
@@ -136,9 +142,7 @@
                     try {
                         const bookRes = await fetch(`/api/books/getBookById?id=${item.book_id}`);
                         const copyRes = await fetch(`/api/books/getBookCopyById?id=${item.copy_id}`);
-                        if (!bookRes.ok || !copyRes.ok) {
-                            throw new Error("Failed to fetch book or copy data");
-                        }
+                        if (!bookRes.ok || !copyRes.ok) throw new Error("Failed to fetch book or copy data");
                         const bookData = await bookRes.json();
                         const copyData = await copyRes.json();
 
@@ -157,37 +161,77 @@
                     }
                 }
                 shippingCost = await fetchShippingCosts();
-                toggleOrderButton(true);
+                toggleButtons(true);
             } else  {
-                toggleOrderButton(false);
+                toggleButtons(false);
             }
             updateSummary(shippingCost, totalPrice);
 
         }
 
-        function updateSummary(shippingCost, totalPrice) {
+        // update summary in the UI
+        async function updateSummary(shippingCost, totalPrice) {
             document.getElementById("total-price").innerText = totalPrice.toFixed(2);
             document.getElementById("shipping-cost").innerText = shippingCost.toFixed(2);
             document.getElementById("final-price").innerText = (totalPrice + shippingCost).toFixed(2);
         }
 
+        // remove item from order and update cart
         async function removeFromCart(copyId) {
-            await fetch(`/api/orders/removeFromOrder?copy_id=${copyId}`, { method: 'POST' });
-            const cartCount = parseInt(localStorage.getItem("cart")) || 0;
-            localStorage.setItem("cart", cartCount - 1);
-            fetchOrder();
-        }
-
-        async function shipOrder(orderId) {
-            await fetch(`/api/orders/shipOrder?order_id=${orderId}`, { method: 'POST' });
-            const message = "Tilaus lähetetty!";
-            document.getElementById("cart-body").innerHTML = "";
-            updateSummary(0, 0);
-            localStorage.setItem("cart", 0);
-            alert(message);
-            window.location.href = "search.html";
+            try {
+                await fetch(`/api/orders/removeFromOrder?copy_id=${copyId}`, { method: 'POST' });
+                const cartCount = parseInt(localStorage.getItem("cart")) || 0;
+                localStorage.setItem("cart", cartCount - 1);
+                fetchOrder();
+            } catch (error) {
+                console.error("Error removing from order:", error);
+            }
         }
         
+        // clear cart and update UI
+        async function clearCart() {
+            try {
+                const orderId = parseInt(localStorage.getItem("orderId"));
+                const response = await fetch(`/api/orders/getOrderById?order_id=${orderId}`);
+                if (!response.ok) throw new Error("Failed to fetch data.");
+                const data = await response.json();
+                if(data.length > 0) {
+                    for (const item of data) {
+                        await fetch(`/api/orders/removeFromOrder?copy_id=${item.copy_id}`, { method: 'POST' });
+                    }
+                }
+                document.getElementById("cart-body").innerHTML = "";
+                updateSummary(0, 0);
+                localStorage.setItem("cart", 0);
+                toggleButtons(false);
+            } catch (error) {
+                console.error("Error clearing cart:", error);
+            }
+        } 
+
+        // ship order and update UI
+        async function shipOrder(orderId) {
+            try {
+                await fetch(`/api/orders/shipOrder?order_id=${orderId}`, { method: 'POST' });
+                const message = "Tilaus lähetetty!";
+                document.getElementById("cart-body").innerHTML = "";
+                updateSummary(0, 0);
+                localStorage.setItem("cart", 0);
+                alert(message);
+                window.location.href = "search.html";
+            } catch (error) {
+                console.error("Error shipping order:", error);
+                alert("Tilausta ei voitu lähettää.");
+            }
+        }
+        
+        // handle role change, clear local storage and redirect
+        async function handleRoleChange() {
+            await clearCart();
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
         fetchOrderId(localStorage.getItem("customer_id"));
     </script>
 </body>
