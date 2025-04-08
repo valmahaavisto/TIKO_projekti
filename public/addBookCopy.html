@@ -8,8 +8,8 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-	    background-color: #f4f4f4;
-	    padding: 20px;
+	        background-color: #f4f4f4;
+	        padding: 20px;
         }
         label {
             width: 150px; 
@@ -42,7 +42,7 @@
         }
         input, select { 
             padding: 8px;
-        width: 50%;
+            width: 50%;
             margin-bottom: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -73,10 +73,8 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const bookToBeAdded = urlParams.get('bookToBeAdded');
-    const storeId = urlParams.get('store_id');
-    let bookId = urlParams.get('book_id');
+        const urlParams = new URLSearchParams(window.location.search);
+        const [bookToBeAdded, storeId, bookId] = [urlParams.get('bookToBeAdded'), urlParams.get('store_id'), urlParams.get('book_id')];
 
         const roleElement = document.getElementById("role");
         if (storeId === "1") {
@@ -87,42 +85,41 @@
             roleElement.textContent = "Rooli: Tuntematon"; 
         }
 
+        if (bookToBeAdded === 'true') {
+            const bookData = JSON.parse(localStorage.getItem('bookData'));
 
-    if (bookToBeAdded === 'true') {
-        const bookData = JSON.parse(localStorage.getItem('bookData'));
-
-        if (!bookData) {
-            console.error('No book data found in localStorage.');
-            alert('Error: No book data found. Please try again.');
-            return;
-        }
-
-        fetch('/api/books/addBook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(bookData)
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Failed to add book');
+            if (!bookData) {
+                console.error('No book data found in localStorage.');
+                alert('Error: No book data found. Please try again.');
+                return;
             }
-        })
-        .then(data => {
-            bookId = data; 
+
+            fetch('/api/books/addBook', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bookData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to add book');
+                }
+            })
+            .then(data => {
+                bookId = data; 
+                addBookCopy(bookId, storeId);
+            })
+            .catch(error => {
+                console.error('Error adding book:', error);
+                alert('Failed to add book. Please try again.');
+            });
+        } else {
             addBookCopy(bookId, storeId);
-        })
-        .catch(error => {
-            console.error('Error adding book:', error);
-            alert('Failed to add book. Please try again.');
-        });
-    } else {
-        addBookCopy(bookId, storeId);
-    }
-});
+        }
+    });
 
     function addBookCopy(bookId, storeId) {
         document.getElementById("addBookCopyForm").addEventListener("submit", function (event) {

@@ -30,35 +30,33 @@
             color: white;
             cursor: pointer; 
         }
-   button {
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 14px;
-	height: 40px; 
-        width: 120px; 
-	text-align: left;
-    }
-    button:hover {
-        background-color: #0056b3;
-    }
-    button:disabled {
-        background-color: #d3d3d3; 
-        color: #808080; 
-        cursor: not-allowed;
-    }
-    input[type="text"], select {
-        padding: 8px;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        box-sizing: border-box;
-    }
-
-
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            height: 40px; 
+            width: 120px; 
+            text-align: left;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #d3d3d3; 
+            color: #808080; 
+            cursor: not-allowed;
+        }
+        input[type="text"], select {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -98,6 +96,7 @@
 
 <script>
 
+    //handle status message
     document.addEventListener("DOMContentLoaded", function () {
         const message = localStorage.getItem('message');
         const details = localStorage.getItem('details');
@@ -168,6 +167,7 @@
     };
 
 
+    // try adding a book with ISBN
     document.getElementById("addForm").addEventListener("submit", function (event) {
         event.preventDefault();
         const isbn = document.getElementById("isbn").value;

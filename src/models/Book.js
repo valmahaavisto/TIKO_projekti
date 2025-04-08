@@ -3,7 +3,6 @@ const pool = require("../config/db");
 const getAllBooks = async () => {
   try {
     const result = await pool.query("SELECT * FROM Book");
-    console.log(result.rows);
     return result.rows.length > 0 ? result.rows : null;
   } catch (error) {
     console.error("Error fetching all books:", error);

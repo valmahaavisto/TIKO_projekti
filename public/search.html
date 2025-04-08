@@ -60,7 +60,7 @@
 <body>
     <div style="display: flex; gap: 10px; justify-content: left; margin-bottom: 30px">
         <p>Rooli: Asiakas</p>
-        <button style="margin-left: 40px" onclick="window.location.href='index.html'">Vaihda Rooli</button>
+        <button style="margin-left: 40px" onclick=changeRole()>Vaihda Rooli</button>
         <button style="margin-left:auto" onclick="window.location.href='shoppingCart.html'">Tarkastele ostoskoria ( <span id="cartCounter">0</span> )</button>
     </div>
     <div style="display: flex; gap: 20px;">
@@ -142,6 +142,17 @@
 
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchBooks(); 
+
+        document.getElementById("searchForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            fetchFilteredBooks();
+        });
+
+        updateCartCounter();
+    });
+
     let sortDirection = {};
 
     function sortTable(columnIndex) {
@@ -181,16 +192,10 @@
         counter.textContent = cartCount;
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        fetchBooks(); 
-
-        document.getElementById("searchForm").addEventListener("submit", function (event) {
-            event.preventDefault();
-            fetchFilteredBooks();
-        });
-
-        updateCartCounter();
-    });
+    function changeRole() {
+        localStorage.removeItem("customer_id"); //remove sensitive data before moving to another page
+        window.location.href = 'index.html';
+    }
 
     function fetchBooks() {
         fetch('api/books')
@@ -338,7 +343,6 @@
         }
     }
 
-    // Helper function to add a book copy to an order
     function addBookCopyToOrder(button, order_id, copy_id) {
         fetch(`/api/orders/addToOrder`, {
             method: "POST",

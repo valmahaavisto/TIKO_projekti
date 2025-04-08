@@ -48,8 +48,6 @@ router.get('/books/export-r2', (req, res) => {
     bookController.getR2(req, res);
 });
 
-
-//not yet implemented
 router.get("/:id/weight", bookController.getBookWeightById);
 
 module.exports = router;

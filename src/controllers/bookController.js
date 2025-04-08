@@ -32,7 +32,6 @@ const getBookById = async (req, res) => {
 	}
   try {
     const book = await Book.getBookById(id);
-
 		if(book) {
 			res.status(200).json(book);
 		} else { 
@@ -51,7 +50,6 @@ const getBookCopyById = async (req, res) => {
 	}
   try {
     const copy = await Book.getBookCopyById(id);
-
 		if(copy) {
 			res.status(200).json(copy);
 		} else { 
@@ -115,14 +113,11 @@ const addBookCopy = async (req, res) => {
   }
 };
 
-
-
 const getBookWithISBN = async (req, res) => {
   const { isbn } = req.query; 
   if (!isbn) {
     return res.status(400).json({ error: "ISBN is required" });
   }
-
   try {
     const book = await Book.getBookWithISBN(isbn);
     if (book) {
@@ -138,7 +133,6 @@ const getBookWithISBN = async (req, res) => {
 
 
 const getFilteredBooks = async (req, res) => {
-  //console.log('Query parameters:', req.query);
   try {
     const filteredBooks = await Book.getFilteredBooks(req.query);
     if (!filteredBooks) {

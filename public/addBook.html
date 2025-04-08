@@ -8,8 +8,8 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-	    background-color: #f4f4f4;
-	    padding: 20px;
+	        background-color: #f4f4f4;
+	        padding: 20px;
         }
         label {
             width: 150px;
@@ -20,35 +20,34 @@
             align-items: center;
             margin-bottom: 10px;
         }
-	button {
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 14px;
-	height: 40px; 
-        width: 120px; 
-	text-align: left;
-    }
-    button:hover {
-        background-color: #0056b3;
-    }
-    button:disabled {
-        background-color: #d3d3d3; 
-        color: #808080; 
-        cursor: not-allowed;
-    }
-    input, select { 
-        padding: 8px;
-	width: 50%;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        box-sizing: border-box;
-    }
-
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            height: 40px; 
+            width: 120px; 
+            text-align: left;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #d3d3d3; 
+            color: #808080; 
+            cursor: not-allowed;
+        }
+        input, select { 
+            padding: 8px;
+            width: 50%;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -87,13 +86,14 @@
         <div class="form-group">
             <label for="luokka">Luokka: </label>
             <select id="luokka" name="luokka" required>
+                <option value="novel">Romaani</option>
                 <option value="comic">Komiikka</option>
                 <option value="non-fiction">Tietokirjallisuus</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="paino">Paino: </label>
+            <label for="paino">Paino (g): </label>
             <input type="number" id="paino" name="paino" required>
         </div>
 
@@ -121,21 +121,9 @@
             const tekija_nimi = document.getElementById("tekija_nimi").value;
             const tyyppi = document.getElementById("tyyppi").value;
             const luokka = document.getElementById("luokka").value;
-            const paino = document.getElementById("paino").value;
+            const paino = document.getElementById("paino").value*0.001; //transform the value from g to kg
 
-            const urlParams = new URLSearchParams(window.location.search);
             const isbn = urlParams.get('isbn');
-            const store_id = urlParams.get('store_id');
-
-            const bookData = {
-                isbn: isbn,
-                nimi: teos_nimi,
-                tekija: tekija_nimi,
-                julkaisuvuosi: teos_vuosi,
-                tyyppi: tyyppi,
-                luokka: luokka,
-                paino: paino
-            };
 
             localStorage.setItem('bookData', JSON.stringify({
                 isbn: isbn,
