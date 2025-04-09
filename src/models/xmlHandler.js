@@ -26,12 +26,11 @@ const parseXml = async (filePath) => {
             const type = information.type?.[0] || null;
             const category = information.category?.[0] || null;
     
-            // Copy parsing...
             const copies = book.copy || [];
             const copyDetails = [];
     
             for (const copy of copies) {
-                const store_id = parseInt(copy.store_id?.[0]) || 4;
+                const store_id = 2;
                 const purchase_price = parseFloat(copy.purchase_price?.[0]) || 0;
                 const selling_price = parseFloat(copy.selling_price?.[0]) || 0;
                 copyDetails.push({ store_id, purchase_price, selling_price });

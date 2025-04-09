@@ -79,7 +79,9 @@ const getBookWeightById = async (req, res) => {
 
 const getR2 = async (req, res) => {
   try {
-    const result = await Book.getR2();
+    const store_id = req.query.id;
+    console.log("Store_id: ", store_id);
+    const result = await Book.getR2(store_id);
     if (result === null) {
       console.log('No data found for R2.');
       return res.status(204).send();
@@ -88,7 +90,7 @@ const getR2 = async (req, res) => {
   } catch (error) {
     console.log('Error fetching R2: ', error);
     res.status(500).json({error: 'Internal Server Error'});
-}
+  }
 };
 
 const addBook = async (req, res) => {

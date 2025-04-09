@@ -1,20 +1,6 @@
 const pool = require('../config/db');
 const Book = require('./Book');
 
-const getAllOrders = async () => {
-    try {
-        const order_check= await pool.query('SELECT * FROM BookOrder ORDER BY order_id');
-        if (order_check.rows.length === 0) {
-            console.log('No orders found.');
-            return null;
-        }
-        return order_check.rows;
-    } catch (error) {
-        console.log('Error fetching all orders: ', error);
-        throw error;
-    }
-};
-
 const getOrderById = async (order_id) => {
    try {
         const order_check = await pool.query('SELECT * FROM BookOrder WHERE order_id = $1', [order_id]);
@@ -35,7 +21,6 @@ const getOrderById = async (order_id) => {
     }
 };
 
-
 const createOrder = async (customer_id) => {
 	try {
 		const customer_check = await pool.query('SELECT name FROM Customer WHERE customer_id = $1', [customer_id]);
@@ -46,14 +31,13 @@ const createOrder = async (customer_id) => {
 		await pool.query(`INSERT INTO BookOrder (customer_id, confirmation_time, status, total_weight, costs) VALUES
 			($1, DEFAULT, 0, 0.00, 0.00)`, [customer_id]);
 		const order_check = await pool.query('SELECT order_id FROM BookOrder WHERE customer_id = $1 ORDER BY order_id DESC', [customer_id]);
-		if(order_check.rows.length > 0) {
-			const order_id = order_check.rows[0].order_id;
-			console.log(`Order ${order_id} created for customer ${customer_id}.`);
-			return order_id;
-		} else {
+		if(order_check.rows.length === 0) {
 			console.log('Order does not exist.');
 			return null;
-		}  
+		}
+		const order_id = order_check.rows[0].order_id;
+		console.log(`Order ${order_id} created for customer ${customer_id}.`);
+		return order_id;
     } catch (error) {
         console.log('Error creating order.', error);
         throw error;
@@ -260,4 +244,4 @@ const shipOrder = async (order_id) => {
     }
 };
 
-module.exports = {getOrderById, getAllOrders, createOrder, deleteOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder}
+module.exports = {getOrderById, createOrder, deleteOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder}

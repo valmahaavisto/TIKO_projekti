@@ -11,6 +11,9 @@
         padding: 20px;
         background-color: #f4f4f4;
     }
+    div {
+        margin-bottom: 20px; /* Adjust the space between divs */
+    }
     h1 {
         text-align: center;
     }
@@ -57,7 +60,18 @@
         border-radius: 5px;
         box-sizing: border-box;
     }
-
+    input[type="submit"] {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+	    height: 40px; 
+        width: 120px; 
+	    text-align: left;
+    }
 </style>
 </head>
 <body>
@@ -74,6 +88,7 @@
             <p>Annetun ISBN-tunnuksen tulee olla 13 numeroa pitkä</p>
         </form>
     </div>
+    <div style = "background-color: #FFFFFF; padding: 10px; border-radius:10px;">
         <h3 style = "margin-top: 40px" >Tuota raportti R2: Teosten kokonaismyyntihinta ja keskihinta luokan mukaan</h3>
         <button onClick="toggleR2Table()">Tuota R2</button>
         <table id="R2Table" style="display:none;">
@@ -89,13 +104,16 @@
                 <!-- Data will be inserted here dynamically -->
             </tbody>
         </table>
-
-        <form id=xmlUploadForm action="/api/upload-xml" method="POST" enctype="multipart/form-data">
+    </div>
+    <div style="background-color: #FFFFFF; padding: 10px; border-radius:10px;">
+        <h3 style="margin-top: 40px;">Lisää kirjoja ja teoskappaleita lataamalla XML-tiedosto</h3>
+        <form id="xmlUploadForm" action="/api/upload-xml" method="POST" enctype="multipart/form-data">
             <input type="file" id="xmlFile" name="file" accept=".xml" required />
-            <input type="submit" value="Upload XML" />
+            <input type="submit"/>
         </form>
         <p id="xmlUploadStatus"></p>
-          
+    </div>
+
 <script>
 
     // update the status message
@@ -136,7 +154,8 @@
             table.style.display = "table";
             if (!isDataLoaded) {
                 try {
-                    const response = await fetch('/api/books/export-r2');
+                    const id = 2;
+                    const response = await fetch(`/api/books/export-r2?id=${id}`);
                     const data = await response.json();
 
                     const tbody = document.querySelector("#R2Table tbody");
@@ -168,17 +187,17 @@
         }
     };
 
-    // Prevent leaving ht epage after uploading xml file, show status message
+    // Prevent leaving the page after uploading xml file, show status message
     document.getElementById("xmlUploadForm").addEventListener("submit", async function(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
         const formData = new FormData(this); // Get the form data (including the file)
         try {
             const response = await fetch("/api/upload-xml", {
                 method: "POST",
                 body: formData
             });
+            const statusMessage = document.getElementById("xmlUploadStatus");
             if (response.ok) {
-                const statusMessage = document.getElementById("xmlUploadStatus");
                 statusMessage.textContent = "Tiedosto käsitelty onnistuneesti, teokset lisätty tietokantaan.";
             } else {
                 statusMessage.textContent = "Virhe tiedoston käsittelyssä.";
