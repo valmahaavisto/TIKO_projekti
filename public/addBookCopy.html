@@ -74,7 +74,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const urlParams = new URLSearchParams(window.location.search);
-        const [bookToBeAdded, storeId, bookId] = [urlParams.get('bookToBeAdded'), urlParams.get('store_id'), urlParams.get('book_id')];
+        let [bookToBeAdded, storeId, bookId] = [urlParams.get('bookToBeAdded'), urlParams.get('store_id'), urlParams.get('book_id')];
 
         const roleElement = document.getElementById("role");
         if (storeId === "1") {
@@ -109,6 +109,7 @@
                 }
             })
             .then(data => {
+		console.log(data);
                 bookId = data; 
                 addBookCopy(bookId, storeId);
             })
