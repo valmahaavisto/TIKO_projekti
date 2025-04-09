@@ -77,7 +77,9 @@ const getR2 = async (store_id) => {
           Category
         ON
           Book.category_id = Category.category_id
-        WHERE store_id = $1
+        WHERE
+          store_id = $1
+          AND BookCopy.status in (0, 1)
         GROUP BY
           Category.category_name
         ORDER BY
@@ -102,6 +104,8 @@ const getR2 = async (store_id) => {
             Category
           ON
             Book.category_id = Category.category_id
+          WHERE
+            BookCopy.status in (0, 1)
           GROUP BY
             Category.category_name
           ORDER BY
