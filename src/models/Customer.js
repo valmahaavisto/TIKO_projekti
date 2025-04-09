@@ -38,7 +38,6 @@ const registerNewCustomer = async (name, address, postalCode, email, password) =
 };
 
 
-// get last year books grouped by customer
 const getR3 = async () => {
     try {
         const result = await pool.query(`
@@ -76,7 +75,7 @@ const getR3 = async () => {
     }
 };
 
-// Not needed, for testing
+
 const getAllCustomers = async () => {
     try {
         const result = await pool.query('SELECT * FROM Customer ORDER BY customer_id');
@@ -89,5 +88,6 @@ const getAllCustomers = async () => {
         throw error;
     }
 };
+
 
 module.exports = {getCustomerLogin, registerNewCustomer, getR3, getAllCustomers};
