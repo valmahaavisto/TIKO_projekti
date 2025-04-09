@@ -22,10 +22,10 @@ const insertTestData = async () => {
 
 
         INSERT INTO Customer (name, address, postal_code, email, password) VALUES
-        ('Matti Meik l inen', 'Esimerkkikatu 1, 00100 Helsinki', '12345', 'matti.meikalainen@example.com', 'salasana123'),
+        ('Matti Meikäläinen', 'Esimerkkikatu 1, 00100 Tampere', '12345', 'matti.meikalainen@example.com', 'salasana123'),
         ('Anna Esimerkki', 'Testikatu 5, 00200 Helsinki', '23456', 'anna.esimerkki@example.com', 'annaSalasana456'),
-        ('Pekka Malli', 'Mallitie 7, 00300 Helsinki', '34567', 'pekka.malli@example.com', 'pekkaMalli789'),
-        ('Laura N yte', 'N ytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
+        ('Pekka Malli', 'Mallitie 7, 00300 Turku', '34567', 'pekka.malli@example.com', 'pekkaMalli789'),
+        ('Laura Näyte', 'Näytekatu 10, 00400 Helsinki', '45678', 'laura.nayte@example.com', 'lauraSalasana012'),
         ('Janne Testi', 'Testikatu 12, 00500 Helsinki', '56789', 'janne.testi@example.com', 'janneTesti345')
         ON CONFLICT (email) DO NOTHING;
 
@@ -72,40 +72,101 @@ const insertTestData = async () => {
 
         INSERT INTO BookOrder (customer_id, confirmation_time, status, total_weight, costs)
         VALUES
-        (1, '2024-01-15 10:30:00', 1, 2.50, 20.00),
-        (1, '2024-02-10 14:45:00', 1, 1.75, 15.00),
-        (2, '2024-03-05 08:20:00', 1, 3.00, 30.50),
-        (2, '2024-01-25 16:00:00', 1, 4.00, 25.00),
-        (3, '2024-04-05 14:30:00', 1, 5.25, 50.00),
-        (4, '2024-02-11 09:15:00', 1, 2.80, 22.00),
-        (2, '2024-03-01 12:00:00', 1, 3.00, 27.50),
-        (4, '2024-03-20 11:00:00', 1, 2.75, 22.50),
-        (1, '2024-04-10 17:10:00', 1, 3.50, 30.00),
-        (2, '2024-03-25 18:20:00', 1, 4.25, 35.00),
-        (3, '2024-04-15 16:30:00', 1, 2.50, 20.50),
-        (4, '2024-03-15 10:00:00', 1, 2.00, 18.00)
+        (1, '2024-01-10 12:00:00', 1, 0.5, 15.00),
+        (1, '2024-01-22 11:15:00', 1, 0.5, 15.00),
+        (1, '2024-03-18 13:15:00', 1, 0.5, 11.00),
+        (1, '2024-04-05 16:00:00', 1, 0.5, 14.50),
+        (2, '2024-01-15 11:00:00', 1, 0.5, 16.50),
+        (2, '2024-02-10 13:30:00', 1, 0.5, 18.00),
+        (2, '2024-04-07 16:30:00', 1, 0.5, 13.50),
+        (3, '2024-02-20 12:00:00', 1, 0.5, 14.00),
+        (3, '2024-03-12 14:45:00', 1, 0.5, 12.00),
+        (3, '2024-03-25 13:00:00', 1, 0.5, 9.00)
         ON CONFLICT (customer_id, confirmation_time) DO NOTHING;
  
 
-        INSERT INTO BookCopy (book_id, store_id, order_id, status, purchase_price, selling_price, sale_time)
+
+        INSERT INTO BookCopy (book_id, store_id, order_id, status, purchase_price, selling_price, sale_time) 
         VALUES
         ((SELECT book_id FROM Book WHERE isbn = '9155430674'), 
         (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
-        (SELECT order_id FROM BookOrder WHERE customer_id = 1 LIMIT 1), 
-        0, 10.00, 15.00, '2024-01-10 10:00:00'),
+        1, 2, 10.00, 15.00, '2024-01-10 10:00:00'),
+
         ((SELECT book_id FROM Book WHERE isbn = '9156381451'), 
         (SELECT store_id FROM Store WHERE name = 'Divari'), 
-        (SELECT order_id FROM BookOrder WHERE customer_id = 1 LIMIT 1), 
-        1, 12.00, 18.00, '2024-02-10 11:15:00'),
+        2, 2, 12.00, 18.00, '2024-02-10 11:15:00'),
+
         ((SELECT book_id FROM Book WHERE isbn = '1995'), 
         (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
-        (SELECT order_id FROM BookOrder WHERE customer_id = 2 LIMIT 1), 
-        0, 8.00, 12.00, '2024-03-12 13:00:00'),
+        3, 2, 8.00, 12.00, '2024-03-12 13:00:00'),
+
         ((SELECT book_id FROM Book WHERE isbn = '1940'), 
         (SELECT store_id FROM Store WHERE name = 'Divari'), 
-        (SELECT order_id FROM BookOrder WHERE customer_id = 2 LIMIT 1), 
-        1, 9.50, 14.50, '2024-04-05 14:00:00')
-        ON CONFLICT (book_id, store_id, order_id) DO NOTHING;
+        4, 2, 9.50, 14.50, '2024-04-05 14:00:00'),
+
+        -- Another copy of 'Elektran tytär'
+        ((SELECT book_id FROM Book WHERE isbn = '9155430674'), 
+        (SELECT store_id FROM Store WHERE name = 'Divari'), 
+        5, 2, 11.00, 16.50, '2024-01-15 09:45:00'),
+
+        -- Another copy of 'Tuulentavoittelijan morsian'
+        ((SELECT book_id FROM Book WHERE isbn = '9156381451'), 
+        (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
+        6, 2, 10.00, 14.00, '2024-02-20 10:30:00'),
+
+        -- A copy of 'Turms kuolematon' in a different store
+        ((SELECT book_id FROM Book WHERE isbn = '1995'), 
+        (SELECT store_id FROM Store WHERE name = 'Divari'), 
+        7, 2, 7.50, 11.00, '2024-03-18 12:45:00'),
+
+        -- Second copy of 'Komisario Palmun erehdys'
+        ((SELECT book_id FROM Book WHERE isbn = '1940'), 
+        (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
+        8, 2, 9.00, 13.50, '2024-04-07 15:00:00'),
+
+        -- First copy of 'Friikkilän pojat Mexicossa'
+        ((SELECT book_id FROM Book WHERE isbn = '1989'), 
+        (SELECT store_id FROM Store WHERE name = 'Divari'), 
+        9, 2, 6.00, 9.00, '2024-03-25 11:00:00'),
+
+        -- First copy of 'Miten saan ystäviä , menestystä , vaikutusvaltaa'
+        ((SELECT book_id FROM Book WHERE isbn = '9789510396230'), 
+        (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
+        10, 2, 10.00, 15.00, '2024-01-22 10:10:00'),
+
+        -- Unsold copy of 'Elektran tytär'
+        ((SELECT book_id FROM Book WHERE isbn = '9155430674'), 
+        (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
+        NULL, 0, 9.00, 13.00, '0001-01-01 00:00:00'),
+
+        -- Unsold copy of 'Tuulentavoittelijan morsian'
+        ((SELECT book_id FROM Book WHERE isbn = '9156381451'), 
+        (SELECT store_id FROM Store WHERE name = 'Divari'), 
+        NULL, 0, 10.00, 15.00, '0001-01-01 00:00:00'),
+
+        -- Another unsold copy of 'Turms kuolematon'
+        ((SELECT book_id FROM Book WHERE isbn = '1995'), 
+        (SELECT store_id FROM Store WHERE name = 'Divari'), 
+        NULL, 0, 7.00, 10.00, '0001-01-01 00:00:00'),
+
+        -- Unsold copy of 'Komisario Palmun erehdys'
+        ((SELECT book_id FROM Book WHERE isbn = '1940'), 
+        (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
+        NULL, 0, 8.50, 12.00, '0001-01-01 00:00:00'),
+
+        -- Another unsold copy of 'Friikkilän pojat Mexicossa'
+        ((SELECT book_id FROM Book WHERE isbn = '1989'), 
+        (SELECT store_id FROM Store WHERE name = 'Keskusdivari'), 
+        NULL, 0, 6.50, 9.50, '0001-01-01 00:00:00'),
+
+        -- Another unsold copy of 'Miten saan ystäviä , menestystä , vaikutusvaltaa'
+        ((SELECT book_id FROM Book WHERE isbn = '9789510396230'), 
+        (SELECT store_id FROM Store WHERE name = 'Divari'), 
+        NULL, 0, 9.50, 14.00, '0001-01-01 00:00:00')
+
+        ON CONFLICT (copy_id, book_id, store_id) DO NOTHING;
+
+
     `);    
 
     console.log('Test data inserted to tables successfully.');

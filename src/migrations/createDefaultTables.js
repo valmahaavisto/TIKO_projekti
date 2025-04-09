@@ -73,7 +73,7 @@ const createDefaultTables = async () => {
         copy_id SERIAL PRIMARY KEY,
         book_id INT NOT NULL,
         store_id INT NOT NULL,
-        order_id INT DEFAULT 0,
+        order_id INT DEFAULT NULL,
         status INT DEFAULT 0,
         purchase_price DECIMAL (5,2) NOT NULL,
         selling_price DECIMAL (5,2) NOT NULL,
@@ -83,7 +83,7 @@ const createDefaultTables = async () => {
         FOREIGN KEY (book_id) REFERENCES Book,
         FOREIGN KEY (store_id) REFERENCES Store,
         FOREIGN KEY (order_id) REFERENCES BookOrder,
-        UNIQUE (book_id, store_id, order_id) -- Add UNIQUE constraint
+        UNIQUE (copy_id, book_id, store_id) -- Add UNIQUE constraint
       );
 
       CREATE TABLE IF NOT EXISTS Shipment (
@@ -121,7 +121,7 @@ const createDefaultTables = async () => {
           WHERE conname = 'unique_bookcopy'
         ) THEN
           ALTER TABLE BookCopy
-          ADD CONSTRAINT unique_bookcopy UNIQUE (book_id, store_id, order_id);
+          ADD CONSTRAINT unique_bookcopy UNIQUE (copy_id, book_id, store_id);
         END IF;
       END $$;
     `); 
