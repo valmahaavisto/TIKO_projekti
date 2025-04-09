@@ -1,0 +1,62 @@
+<books>
+  <book>
+    <information>
+      <title>Clean Code</title>
+      <author>Robert C. Martin</author>
+      <isbn>9780132350884</isbn>
+      <publication_year>2008</publication_year>
+      <weight>0.2</weight>
+      <type>guide</type>
+      <category>non-fiction</category>
+    </information>
+    <copy>
+      <store_id>1</store_id>
+      <purchase_price>20.00</purchase_price>
+      <selling_price>35.00</selling_price>
+    </copy>
+    <copy>
+      <store_id>1</store_id>
+      <purchase_price>18.50</purchase_price>
+      <selling_price>32.00</selling_price>
+    </copy>
+  </book>
+
+  <book>
+    <information>
+      <title>The Pragmatic Programmer</title>
+      <author>Andrew Hunt</author>
+      <isbn>9780201616224</isbn>
+      <publication_year>1999</publication_year>
+      <weight>0.6</weight>
+      <type>guide</type>
+      <category>non-fiction</category>
+    </information>
+    <copy>
+      <store_id>1</store_id>
+      <purchase_price>22.00</purchase_price>
+      <selling_price>38.00</selling_price>
+    </copy>
+  </book>
+
+  <book>
+    <information>
+      <title>Atomic Habits</title>
+      <author>James Clear</author>
+      <isbn>9780735211292</isbn>
+      <publication_year>2018</publication_year>
+      <weight>0.3</weight>
+      <type>romance</type>
+      <category>novel</category>
+    </information>
+    <copy>
+      <store_id>1</store_id>
+      <purchase_price>15.00</purchase_price>
+      <selling_price>25.00</selling_price>
+    </copy>
+    <copy>
+      <store_id>1</store_id>
+      <purchase_price>14.50</purchase_price>
+      <selling_price>24.00</selling_price>
+    </copy>
+  </book>
+</books>
