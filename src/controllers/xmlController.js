@@ -9,8 +9,9 @@ const handleXMLUpload = async (req, res) => {
         const books = await parseXml(filePath);
         for (const book of books) {
             console.log("Book info:", { isbn: book.isbn, title: book.title, author: book.author, publication_year: book.publication_year, weight: book.weight, type: book.type, category: book.category });
-            const existingBook = await getBookWithISBN({ isbn: book.isbn });
+            const existingBook = await getBookWithISBN(book.isbn);
             let book_id;
+            console.log("Existing book: ", existingBook);
             if (existingBook == null) {
                     book_id = await addBook({
                     isbn: book.isbn,
