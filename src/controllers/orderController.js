@@ -1,23 +1,6 @@
 const pool = require("../config/db");
 const Order = require("../models/Order");
 
-// tested and works
-const getAllOrders = async (req, res) => {
-	console.log("Fetching all orders...");
- 	try {
-    	const allOrders = await Order.getAllOrders();
-    	if (!allOrders) {
-      		return res.status(404).json({ error: "No orders found." });
-    	}
-    	res.json(allOrders);
-  	} catch (error) {
-    	console.error("Error fetching all orders:", error.message);
-    	res.status(500).json({ error: "Internal Server Error" });
-  	}
-};
-
-
-// tested and works
 const getOrderById = async (req, res) => {
 	const { order_id } = req.query;
 	if(!order_id) {
@@ -90,7 +73,6 @@ const getOrderId = async(req, res) => {
   	}
 };
 
-// tested and works
 const countShippingCosts = async (req, res) => {
 	const { order_id } = req.query;
 	if(!order_id) {
@@ -110,7 +92,6 @@ const countShippingCosts = async (req, res) => {
 	}
 };
 
-// tested and working
 const addToOrder = async (req, res) => {
   const { order_id, copy_id } = req.body;
   if (!order_id || !copy_id) {
@@ -129,8 +110,6 @@ const addToOrder = async (req, res) => {
   }
 };
 
-
-//tested and works
 const removeFromOrder = async (req, res) => {
   const { copy_id } = req.query;
   if (!copy_id) {
@@ -167,5 +146,4 @@ const shipOrder = async (req, res) => {
   	}
 };
 
-
-module.exports = {getAllOrders, getOrderById, createOrder, deleteOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder};
+module.exports = {getOrderById, createOrder, deleteOrder, getOrderId, countShippingCosts, addToOrder, removeFromOrder, shipOrder};

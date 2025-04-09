@@ -2,11 +2,6 @@ const express = require("express");
 const router = express.Router();
 const orderController = require('../controllers/orderController');
 
-router.get('/orders', (req, res) => {
-    console.log('Incoming request: GET /api/orders');
-    orderController.getAllOrders(req, res);
-}); 
-
 router.get('/orders/getOrderById', (req, res) => {
 	console.log('Incoming request: GET /api/orders/getOrderById');
 	orderController.getOrderById(req, res);
